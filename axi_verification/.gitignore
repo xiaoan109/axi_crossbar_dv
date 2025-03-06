@@ -1,0 +1,8 @@
+*.*
+*
+!*/
+!sim/Makefile
+!sim/wave.do
+!src/*.sv
+!test/**
+!testlist/**
