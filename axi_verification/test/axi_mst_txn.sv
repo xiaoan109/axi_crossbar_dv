@@ -1,7 +1,8 @@
 class axi_mst_txn #(
     int AXI_DATA_W = 8,
     int AXI_ADDR_W = 8,
-    int AXI_ID_W   = 8
+    int AXI_ID_W   = 8,
+    int AXI_USER_W = 8
 ) extends uvm_sequence_item;
 
   typedef axi_mst_txn#(AXI_DATA_W, AXI_ADDR_W, AXI_ID_W) this_type_t;
@@ -20,11 +21,14 @@ class axi_mst_txn #(
   rand prot_e                             awprot;
   rand bit             [             3:0] awqos;
   rand bit             [             3:0] awregion;
+  rand bit             [  AXI_USER_W-1:0] awuser;
   rand bit             [  AXI_DATA_W-1:0] wdata                                       [$:1<<8];
   rand bit             [AXI_DATA_W/8-1:0] wstrb                                       [$:1<<8];
+  rand bit             [  AXI_USER_W-1:0] wuser;
   bit                                     wlast;
   response_e                              bresp;
   bit                  [    AXI_ID_W-1:0] bid;
+  bit                  [  AXI_USER_W-1:0] buser;
   // Read transaction
   rand bit             [  AXI_ADDR_W-1:0] araddr;
   rand size_e                             arsize;
@@ -36,10 +40,13 @@ class axi_mst_txn #(
   rand prot_e                             arprot;
   rand bit             [             3:0] arqos;
   rand bit             [             3:0] arregion;
+  rand bit             [  AXI_USER_W-1:0] aruser;
   bit                  [  AXI_DATA_W-1:0] rdata                                       [$:1<<8];
   bit                  [    AXI_ID_W-1:0] rid;
   response_e                              rresp;
   bit                                     rlast;
+  bit                  [  AXI_USER_W-1:0] ruser;
+
 
   // crossbar needed
   rand bit             [             1:0] sa;

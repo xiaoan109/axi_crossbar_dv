@@ -3,7 +3,8 @@ class axi_slave_agent extends uvm_agent;
 
   axi_slave_driver driver;
   axi_slave_monitor monitor;
-  uvm_analysis_port #(axi_s_txn) analysis_port;
+  axi_slave_sequencer wr_sequencer;
+  axi_slave_sequencer rd_sequencer;
 
   axi_vif vif;
   int slave_id = -1;
@@ -28,17 +29,21 @@ function void axi_slave_agent::build_phase(uvm_phase phase);
   // TODO: change is_active to cfg.is_active
   uvm_config_db#(axi_vif)::set(this, "driver", "vif", vif);
   uvm_config_db#(axi_vif)::set(this, "monitor", "vif", vif);
-  uvm_config_db#(int)::set(this, "driver", "slave_id", slave_id);
-  uvm_config_db#(int)::set(this, "monitor", "slave_id", slave_id);
+  // uvm_config_db#(int)::set(this, "driver", "slave_id", slave_id);
+  // uvm_config_db#(int)::set(this, "monitor", "slave_id", slave_id);
+  uvm_config_db#(int)::set(this, "*", "slave_id", slave_id);  // config_db for seq
   monitor = axi_slave_monitor::type_id::create("monitor", this);
   if (is_active == UVM_ACTIVE) begin
     driver = axi_slave_driver::type_id::create("driver", this);
+    wr_sequencer = axi_slave_sequencer::type_id::create("wr_sequencer", this);
+    rd_sequencer = axi_slave_sequencer::type_id::create("rd_sequencer", this);
   end
-  analysis_port = new("analysis_port", this);
 endfunction
 
 function void axi_slave_agent::connect_phase(uvm_phase phase);
   super.connect_phase(phase);
-  // TODO: connect monitor to scoreboard
-  monitor.mon2scb.connect(analysis_port);
+  if (is_active == UVM_ACTIVE) begin
+    driver.wr_seq_item_port.connect(wr_sequencer.seq_item_export);
+    driver.rd_seq_item_port.connect(rd_sequencer.seq_item_export);
+  end
 endfunction

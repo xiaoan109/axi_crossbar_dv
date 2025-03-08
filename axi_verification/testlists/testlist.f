@@ -1,0 +1,7 @@
+axi_base_test
+axi_bk_read_after_write_test
+axi_nbk_read_after_write_test
+axi_bk_single_master_write_test
+axi_nbk_single_master_write_test
+axi_bk_single_master_read_test
+axi_nbk_single_master_read_test

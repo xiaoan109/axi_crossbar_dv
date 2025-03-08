@@ -17,7 +17,8 @@ package axi_env_pkg;
   typedef uvm_sequencer#(axi_s_txn) axi_slave_sequencer;
   `include "axi_slave_agent.sv"
 
-  `include "axi_ms_scoreboard.sv"
+  // `include "axi_ms_scoreboard.sv"
+  `include "axi4_scoreboard.sv"
 
   `include "axi_env.sv"
 endpackage

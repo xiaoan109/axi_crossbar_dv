@@ -32,11 +32,17 @@ function void axi_base_test::connect_phase(uvm_phase phase);
   super.connect_phase(phase);
 
   // Connect components
-  foreach (v_sqr.wr_sequencer[i]) begin
-    v_sqr.wr_sequencer[i] = env.master_agent[i].wr_sequencer;
+  foreach (v_sqr.m_wr_sequencer[i]) begin
+    v_sqr.m_wr_sequencer[i] = env.master_agent[i].wr_sequencer;
   end
-  foreach (v_sqr.rd_sequencer[i]) begin
-    v_sqr.rd_sequencer[i] = env.master_agent[i].rd_sequencer;
+  foreach (v_sqr.m_rd_sequencer[i]) begin
+    v_sqr.m_rd_sequencer[i] = env.master_agent[i].rd_sequencer;
+  end
+  foreach (v_sqr.s_wr_sequencer[i]) begin
+    v_sqr.s_wr_sequencer[i] = env.slave_agent[i].wr_sequencer;
+  end
+  foreach (v_sqr.s_rd_sequencer[i]) begin
+    v_sqr.s_rd_sequencer[i] = env.slave_agent[i].rd_sequencer;
   end
 endfunction
 
@@ -70,12 +76,12 @@ endtask : shutdown_phase
 
 function void axi_base_test::report_phase(uvm_phase phase);
   super.report_phase(phase);
-  `uvm_info("SB_REPORT", {"\n", env.scoreboard.convert2string()}, UVM_MEDIUM);
-  if (env.scoreboard.get_mismatches() == 0) begin
-    `uvm_info("TEST_PASSED", "No mismatches", UVM_LOW)
-  end else begin
-    `uvm_info("TEST_FAILED", $sformatf("mismatches: %d", env.scoreboard.get_mismatches()), UVM_LOW)
-  end
+  // `uvm_info("SB_REPORT", {"\n", env.scoreboard.convert2string()}, UVM_MEDIUM);
+  // if (env.scoreboard.get_mismatches() == 0) begin
+  //   `uvm_info("TEST_PASSED", "No mismatches", UVM_LOW)
+  // end else begin
+  //   `uvm_info("TEST_FAILED", $sformatf("mismatches: %d", env.scoreboard.get_mismatches()), UVM_LOW)
+  // end
 endfunction : report_phase
 
 // blocking read after write test

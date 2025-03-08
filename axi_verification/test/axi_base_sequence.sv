@@ -1,8 +1,12 @@
 // sequence lib
-class axi_base_sequence extends uvm_sequence #(axi_m_txn);
-  `uvm_object_utils(axi_base_sequence)
+//  ===========================
+//  |  M   A   S   T   E   R  |
+//  ===========================
+class axi_master_base_sequence extends uvm_sequence #(axi_m_txn);
+  `uvm_object_utils(axi_master_base_sequence)
   int master_id = -1;
-  static bit [3:0] id[4]; // only lower 4 bits are used
+  static bit [3:0] wr_id[4];  // only lower 4 bits are used
+  static bit [3:0] rd_id[4];  // only lower 4 bits are used
 
   function new(string name = "axi_base_sequence");
     super.new(name);
@@ -12,8 +16,8 @@ class axi_base_sequence extends uvm_sequence #(axi_m_txn);
 endclass
 
 // blocking write sequence
-class axi_bk_wr_sequence extends axi_base_sequence;
-  `uvm_object_utils(axi_bk_wr_sequence)
+class axi_master_bk_wr_sequence extends axi_master_base_sequence;
+  `uvm_object_utils(axi_master_bk_wr_sequence)
 
   function new(string name = "axi_wr_sequence");
     super.new(name);
@@ -23,13 +27,13 @@ class axi_bk_wr_sequence extends axi_base_sequence;
   extern virtual task body();
 endclass
 
-task axi_bk_wr_sequence::pre_start();
+task axi_master_bk_wr_sequence::pre_start();
   if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
     `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
   end
 endtask
 
-task axi_bk_wr_sequence::body();
+task axi_master_bk_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Blocking Write sequence", UVM_MEDIUM)
   `uvm_create(req);
   // TODO: unaligned address
@@ -47,14 +51,14 @@ task axi_bk_wr_sequence::body();
     // da == 1;  //temp
   });
   // TODO: masked id
-  req.awid = {4'h1 << req.sa, id[master_id]};
+  req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
-  id[master_id]++;
+  wr_id[master_id]++;
 endtask
 
 // blocking read sequence
-class axi_bk_rd_sequence extends axi_base_sequence;
-  `uvm_object_utils(axi_bk_rd_sequence)
+class axi_master_bk_rd_sequence extends axi_master_base_sequence;
+  `uvm_object_utils(axi_master_bk_rd_sequence)
 
   function new(string name = "axi_rd_sequence");
     super.new(name);
@@ -64,14 +68,14 @@ class axi_bk_rd_sequence extends axi_base_sequence;
   extern virtual task body();
 endclass
 
-task axi_bk_rd_sequence::pre_start();
+task axi_master_bk_rd_sequence::pre_start();
   // TODO: use config_db to set num_of_transfers from test
   if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
     `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
   end
 endtask
 
-task axi_bk_rd_sequence::body();
+task axi_master_bk_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Blocking Read sequence", UVM_MEDIUM)
   `uvm_create(req);
   // TODO: unaligned address
@@ -89,14 +93,14 @@ task axi_bk_rd_sequence::body();
     // da == 1;  //temp
   });
   // TODO: masked id
-  req.arid = {4'h1 << req.sa, id[master_id]};
+  req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
-  id[master_id]++;
+  rd_id[master_id]++;
 endtask
 
 // non-blocking write sequence
-class axi_nbk_wr_sequence extends axi_base_sequence;
-  `uvm_object_utils(axi_nbk_wr_sequence)
+class axi_master_nbk_wr_sequence extends axi_master_base_sequence;
+  `uvm_object_utils(axi_master_nbk_wr_sequence)
 
   function new(string name = "axi_nb_wr_sequence");
     super.new(name);
@@ -106,13 +110,13 @@ class axi_nbk_wr_sequence extends axi_base_sequence;
   extern virtual task body();
 endclass
 
-task axi_nbk_wr_sequence::pre_start();
+task axi_master_nbk_wr_sequence::pre_start();
   if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
     `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
   end
 endtask
 
-task axi_nbk_wr_sequence::body();
+task axi_master_nbk_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
   `uvm_create(req);
   req.set_addr_align();
@@ -125,14 +129,14 @@ task axi_nbk_wr_sequence::body();
     transfer_type == NON_BLOCKING_WRITE;
     sa == master_id[1:0];  //temp
   });
-  req.awid = {4'h1 << req.sa, id[master_id]};
+  req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
-  id[master_id]++;
+  wr_id[master_id]++;
 endtask
 
 // non-blocking read sequence
-class axi_nbk_rd_sequence extends axi_base_sequence;
-  `uvm_object_utils(axi_nbk_rd_sequence)
+class axi_master_nbk_rd_sequence extends axi_master_base_sequence;
+  `uvm_object_utils(axi_master_nbk_rd_sequence)
 
   function new(string name = "axi_nbk_rd_sequence");
     super.new(name);
@@ -142,13 +146,13 @@ class axi_nbk_rd_sequence extends axi_base_sequence;
   extern virtual task body();
 endclass
 
-task axi_nbk_rd_sequence::pre_start();
+task axi_master_nbk_rd_sequence::pre_start();
   if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
     `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
   end
 endtask
 
-task axi_nbk_rd_sequence::body();
+task axi_master_nbk_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)
   `uvm_create(req);
   req.set_addr_align();
@@ -161,10 +165,139 @@ task axi_nbk_rd_sequence::body();
     transfer_type == NON_BLOCKING_READ;
     sa == master_id[1:0];  //temp
   });
-  req.arid = {4'h1 << req.sa, id[master_id]};
+  req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
-  id[master_id]++;
+  rd_id[master_id]++;
 endtask
+
+//  ========================
+//  |  S   L   A   V   E   |
+//  ========================
+
+class axi_slave_base_sequence extends uvm_sequence #(axi_s_txn);
+  `uvm_object_utils(axi_slave_base_sequence)
+  int slave_id = -1;
+
+  function new(string name = "axi_base_sequence");
+    super.new(name);
+    set_automatic_phase_objection(1);
+  endfunction
+
+endclass
+
+// blocking write sequence
+class axi_slave_bk_wr_sequence extends axi_slave_base_sequence;
+  `uvm_object_utils(axi_slave_bk_wr_sequence)
+
+  function new(string name = "axi_wr_sequence");
+    super.new(name);
+  endfunction
+
+  extern virtual task pre_start();
+  extern virtual task body();
+endclass
+
+task axi_slave_bk_wr_sequence::pre_start();
+  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
+    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+  end
+endtask
+
+task axi_slave_bk_wr_sequence::body();
+  `uvm_info("WR_SEQ", "Starting Blocking Write sequence", UVM_MEDIUM)
+  `uvm_create(req);
+  start_item(req);
+  // TODO: different burst types
+  assert (req.randomize());
+  finish_item(req);
+endtask
+
+// blocking read sequence
+class axi_slave_bk_rd_sequence extends axi_slave_base_sequence;
+  `uvm_object_utils(axi_slave_bk_rd_sequence)
+
+  function new(string name = "axi_rd_sequence");
+    super.new(name);
+  endfunction
+
+  extern virtual task pre_start();
+  extern virtual task body();
+endclass
+
+task axi_slave_bk_rd_sequence::pre_start();
+  // TODO: use config_db to set num_of_transfers from test
+  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
+    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+  end
+endtask
+
+task axi_slave_bk_rd_sequence::body();
+  `uvm_info("RD_SEQ", "Starting Blocking Read sequence", UVM_MEDIUM)
+  `uvm_create(req);
+  start_item(req);
+  // TODO: different burst types
+  assert (req.randomize());
+  finish_item(req);
+endtask
+
+// non-blocking write sequence
+class axi_slave_nbk_wr_sequence extends axi_slave_base_sequence;
+  `uvm_object_utils(axi_slave_nbk_wr_sequence)
+
+  function new(string name = "axi_nb_wr_sequence");
+    super.new(name);
+  endfunction
+
+  extern virtual task pre_start();
+  extern virtual task body();
+endclass
+
+task axi_slave_nbk_wr_sequence::pre_start();
+  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
+    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+  end
+endtask
+
+task axi_slave_nbk_wr_sequence::body();
+  `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
+  `uvm_create(req);
+  start_item(req);
+  assert (req.randomize());
+  finish_item(req);
+endtask
+
+// non-blocking read sequence
+class axi_slave_nbk_rd_sequence extends axi_slave_base_sequence;
+  `uvm_object_utils(axi_slave_nbk_rd_sequence)
+
+  function new(string name = "axi_nbk_rd_sequence");
+    super.new(name);
+  endfunction
+
+  extern virtual task pre_start();
+  extern virtual task body();
+endclass
+
+task axi_slave_nbk_rd_sequence::pre_start();
+  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
+    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+  end
+endtask
+
+task axi_slave_nbk_rd_sequence::body();
+  `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)
+  `uvm_create(req);
+  start_item(req);
+  assert (req.randomize());
+  finish_item(req);
+endtask
+
+
+
+
+//  ==================================================================
+//  |  V   I   R   T   U   A   L  --  S   E   Q   U   E   N   C   E  |
+//  ==================================================================
 
 // virtual sequence
 class axi_base_vseq extends uvm_sequence;
@@ -200,26 +333,62 @@ function axi_bk_read_after_write_vseq::new(string name = "axi_bk_read_after_writ
 endfunction
 
 task axi_bk_read_after_write_vseq::body();
-  axi_bk_wr_sequence wr_seq[4];
-  axi_bk_rd_sequence rd_seq[4];
+  axi_master_bk_wr_sequence m_wr_seq[4];
+  axi_master_bk_rd_sequence m_rd_seq[4];
+  axi_slave_bk_wr_sequence  s_wr_seq[4];
+  axi_slave_bk_rd_sequence  s_rd_seq[4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    fork
-      automatic int j = i;
-      `uvm_do_on(wr_seq[j], p_sequencer.wr_sequencer[j]);
-    join_none
-  end
-  wait fork;
-  #100ns;
-  for (int i = 0; i < 4; i++) begin
-    fork
-      automatic int j = i;
-      `uvm_do_on(rd_seq[j], p_sequencer.rd_sequencer[j]);
-    join_none
-  end
-  wait fork;
-  #100ns;
+
+
+  fork
+    begin : T1_SL_WR
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_wr_seq[j], p_sequencer.s_wr_sequencer[j])
+          end
+        join_none
+      end
+    end
+    begin : T2_SL_RD
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_rd_seq[j], p_sequencer.s_rd_sequencer[j])
+          end
+        join_none
+      end
+    end
+  join_none
+
+
+
+  fork
+    begin : T1_WRITE
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          repeat (2) begin
+            `uvm_do_on(m_wr_seq[j], p_sequencer.m_wr_sequencer[j])
+          end
+        join_none
+      end
+    end
+    begin : T2_READ
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          repeat (3) begin
+            `uvm_do_on(m_rd_seq[j], p_sequencer.m_rd_sequencer[j])
+          end
+        join_none
+      end
+    end
+  join
+
 endtask
 
 // virtual sequence: non-blocking read after write
@@ -236,26 +405,60 @@ function axi_nbk_read_after_write_vseq::new(string name = "axi_nbk_read_after_wr
 endfunction
 
 task axi_nbk_read_after_write_vseq::body();
-  axi_nbk_wr_sequence wr_seq[4];
-  axi_nbk_rd_sequence rd_seq[4];
+  axi_master_nbk_wr_sequence m_wr_seq[4];
+  axi_master_nbk_rd_sequence m_rd_seq[4];
+  axi_slave_nbk_wr_sequence  s_wr_seq[4];
+  axi_slave_nbk_rd_sequence  s_rd_seq[4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    fork
-      automatic int j = i;
-      `uvm_do_on(wr_seq[j], p_sequencer.wr_sequencer[j]);
-    join_none
-  end
-  wait fork;
-  #100ns;
-  for (int i = 0; i < 4; i++) begin
-    fork
-      automatic int j = i;
-      `uvm_do_on(rd_seq[j], p_sequencer.rd_sequencer[j]);
-    join_none
-  end
-  wait fork;
-  #100ns;
+
+  fork
+    begin : T1_SL_WR
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_wr_seq[j], p_sequencer.s_wr_sequencer[j])
+          end
+        join_none
+      end
+    end
+    begin : T2_SL_RD
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_rd_seq[j], p_sequencer.s_rd_sequencer[j])
+          end
+        join_none
+      end
+    end
+  join_none
+
+
+
+  fork
+    begin : T1_WRITE
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          repeat (2) begin
+            `uvm_do_on(m_wr_seq[j], p_sequencer.m_wr_sequencer[j])
+          end
+        join_none
+      end
+    end
+    begin : T2_READ
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          repeat (3) begin
+            `uvm_do_on(m_rd_seq[j], p_sequencer.m_rd_sequencer[j])
+          end
+        join_none
+      end
+    end
+  join
 endtask
 
 // virtual sequence: blocking single master write
@@ -271,15 +474,38 @@ function axi_bk_single_master_write_vseq::new(string name = "axi_bk_single_maste
 endfunction
 
 task axi_bk_single_master_write_vseq::body();
-  axi_bk_wr_sequence wr_seq;
+  axi_master_bk_wr_sequence m_wr_seq;
+  axi_slave_bk_wr_sequence  s_wr_seq [4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    repeat (4) begin
-      `uvm_do_on(wr_seq, p_sequencer.wr_sequencer[i]);
+
+  fork
+    begin : T1_SL_WR
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_wr_seq[j], p_sequencer.s_wr_sequencer[j])
+          end
+        join_none
+      end
     end
-    #100ns;
-  end
+  join_none
+
+  #100ns;
+
+
+  fork
+    begin : T1_WRITE
+      for (int i = 0; i < 4; i++) begin
+        repeat (4) begin
+          `uvm_do_on(m_wr_seq, p_sequencer.m_wr_sequencer[i])
+        end
+      end
+      #100ns;
+    end
+  join
+
 endtask
 
 // virtual sequence: blocking single master read
@@ -295,15 +521,37 @@ function axi_bk_single_master_read_vseq::new(string name = "axi_bk_single_master
 endfunction
 
 task axi_bk_single_master_read_vseq::body();
-  axi_bk_rd_sequence rd_seq;
+  axi_master_bk_rd_sequence m_rd_seq;
+  axi_slave_bk_rd_sequence  s_rd_seq [4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    repeat (4) begin
-      `uvm_do_on(rd_seq, p_sequencer.rd_sequencer[i]);
+
+
+
+  fork
+    begin : T1_SL_RD
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_rd_seq[j], p_sequencer.s_rd_sequencer[j])
+          end
+        join_none
+      end
     end
-    #100ns;
-  end
+  join_none
+
+
+  fork
+    begin : T1_READ
+      for (int i = 0; i < 4; i++) begin
+        repeat (4) begin
+          `uvm_do_on(m_rd_seq, p_sequencer.m_rd_sequencer[i])
+        end
+      end
+      #100ns;
+    end
+  join
 endtask
 
 
@@ -320,15 +568,35 @@ function axi_nbk_single_master_write_vseq::new(string name = "axi_nbk_single_mas
 endfunction
 
 task axi_nbk_single_master_write_vseq::body();
-  axi_nbk_wr_sequence wr_seq;
+  axi_master_nbk_wr_sequence m_wr_seq;
+  axi_slave_nbk_wr_sequence  s_wr_seq [4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    repeat (4) begin
-      `uvm_do_on(wr_seq, p_sequencer.wr_sequencer[i]);
+
+  fork
+    begin : T1_SL_WR
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_wr_seq[j], p_sequencer.s_wr_sequencer[j])
+          end
+        join_none
+      end
     end
-    #100ns;
-  end
+  join_none
+
+
+  fork
+    begin : T1_WRITE
+      for (int i = 0; i < 4; i++) begin
+        repeat (4) begin
+          `uvm_do_on(m_wr_seq, p_sequencer.m_wr_sequencer[i])
+        end
+      end
+      #100ns;
+    end
+  join
 endtask
 
 // virtual sequence: non-blocking single master read
@@ -344,15 +612,37 @@ function axi_nbk_single_master_read_vseq::new(string name = "axi_nbk_single_mast
 endfunction
 
 task axi_nbk_single_master_read_vseq::body();
-  axi_nbk_rd_sequence rd_seq;
+  axi_master_nbk_rd_sequence m_rd_seq;
+  axi_slave_nbk_rd_sequence  s_rd_seq [4];
   reset_event.wait_on();  // wait for reset
   reset_event.wait_off();
-  for (int i = 0; i < 4; i++) begin
-    repeat (4) begin
-      `uvm_do_on(rd_seq, p_sequencer.rd_sequencer[i]);
+
+
+
+  fork
+    begin : T1_SL_RD
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_rd_seq[j], p_sequencer.s_rd_sequencer[j])
+          end
+        join_none
+      end
     end
-    #100ns;
-  end
+  join_none
+
+
+  fork
+    begin : T1_READ
+      for (int i = 0; i < 4; i++) begin
+        repeat (4) begin
+          `uvm_do_on(m_rd_seq, p_sequencer.m_rd_sequencer[i])
+        end
+      end
+      #100ns;
+    end
+  join
 endtask
 
 

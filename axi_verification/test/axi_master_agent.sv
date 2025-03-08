@@ -5,7 +5,6 @@ class axi_master_agent extends uvm_agent;
   axi_master_monitor monitor;
   axi_master_sequencer wr_sequencer;
   axi_master_sequencer rd_sequencer;
-  uvm_analysis_port #(axi_m_txn) analysis_port;
 
   axi_vif vif;
   int master_id = -1;
@@ -39,7 +38,6 @@ function void axi_master_agent::build_phase(uvm_phase phase);
     wr_sequencer = axi_master_sequencer::type_id::create("wr_sequencer", this);
     rd_sequencer = axi_master_sequencer::type_id::create("rd_sequencer", this);
   end
-  analysis_port = new("analysis_port", this);
 endfunction
 
 function void axi_master_agent::connect_phase(uvm_phase phase);
@@ -48,6 +46,4 @@ function void axi_master_agent::connect_phase(uvm_phase phase);
     driver.wr_seq_item_port.connect(wr_sequencer.seq_item_export);
     driver.rd_seq_item_port.connect(rd_sequencer.seq_item_export);
   end
-  // TODO: connect monitor to scoreboard
-  monitor.mon2scb.connect(analysis_port);
 endfunction

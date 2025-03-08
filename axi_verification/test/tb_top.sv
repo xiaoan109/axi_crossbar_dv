@@ -440,7 +440,16 @@ module tb_top ();
   initial begin
     aclk = 1'b0;
     aresetn = 1'b1;  // deasserted
-    srst = 1'b0;  //not used
+    srst = 1'b0; // deasserted
+
+    // ---For Code Coverage---
+    repeat (2) @(posedge aclk);
+    srst <= 1'b1;  // asserted
+    repeat (10) @(posedge aclk);
+    srst <= 1'b0;  // deasserted
+    // ---For Code Coverage---
+
+    // Active low reset
     repeat (2) @(posedge aclk);
     aresetn <= 1'b0;  // asserted
     repeat (10) @(posedge aclk);

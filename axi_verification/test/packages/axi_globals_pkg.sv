@@ -17,6 +17,7 @@ package axi_globals_pkg;
   parameter int SLV3_START_ADDR = 3 * (1 << AXI_ADDR_W) / 4;
   parameter int SLV3_END_ADDR = (1 << AXI_ADDR_W) - 1;
 
+  parameter int OUTSTANDING_FIFO_DEPTH = 16;  // only for slave driver
 
   typedef enum bit {
     READ,
