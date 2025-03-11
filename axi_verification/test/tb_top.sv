@@ -440,7 +440,7 @@ module tb_top ();
   initial begin
     aclk = 1'b0;
     aresetn = 1'b1;  // deasserted
-    srst = 1'b0; // deasserted
+    srst = 1'b0;  // deasserted
 
     // ---For Code Coverage---
     repeat (2) @(posedge aclk);
@@ -469,6 +469,11 @@ module tb_top ();
 
   initial begin
     run_test();
+  end
+
+  initial begin
+    $dumpvars;
+    $dumpfile("dump.vcd");
   end
 
 

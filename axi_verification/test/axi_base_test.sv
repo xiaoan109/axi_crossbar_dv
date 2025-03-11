@@ -85,94 +85,110 @@ function void axi_base_test::report_phase(uvm_phase phase);
 endfunction : report_phase
 
 // blocking read after write test
-class axi_bk_read_after_write_test extends axi_base_test;
-  `uvm_component_utils(axi_bk_read_after_write_test)
+class axi_bk_write_read_test extends axi_base_test;
+  `uvm_component_utils(axi_bk_write_read_test)
 
 
-  function new(string name = "axi_bk_read_after_write_test", uvm_component parent = null);
+  function new(string name = "axi_bk_write_read_test", uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_bk_read_after_write_vseq::type_id::get());
+                                            axi_bk_write_read_vseq::type_id::get());
   endfunction
 endclass
 
 // non-blocking read after write test
-class axi_nbk_read_after_write_test extends axi_base_test;
-  `uvm_component_utils(axi_nbk_read_after_write_test)
+class axi_nbk_write_read_test extends axi_base_test;
+  `uvm_component_utils(axi_nbk_write_read_test)
 
-  function new(string name = "axi_nbk_read_after_write_test", uvm_component parent = null);
+  function new(string name = "axi_nbk_write_read_test", uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_nbk_read_after_write_vseq::type_id::get());
+                                            axi_nbk_write_read_vseq::type_id::get());
   endfunction
 endclass
 
 // blocking single master write test
-class axi_bk_single_master_write_test extends axi_base_test;
-  `uvm_component_utils(axi_bk_single_master_write_test)
+class axi_bk_single_master_random_write_test extends axi_base_test;
+  `uvm_component_utils(axi_bk_single_master_random_write_test)
 
-  function new(string name = "axi_bk_single_master_write_test", uvm_component parent = null);
+  function new(string name = "axi_bk_single_master_random_write_test", uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_bk_single_master_write_vseq::type_id::get());
+                                            axi_bk_single_master_random_write_vseq::type_id::get());
   endfunction
 endclass
 
 // blocking single master read test
-class axi_bk_single_master_read_test extends axi_base_test;
-  `uvm_component_utils(axi_bk_single_master_read_test)
+class axi_bk_single_master_random_read_test extends axi_base_test;
+  `uvm_component_utils(axi_bk_single_master_random_read_test)
 
-  function new(string name = "axi_bk_single_master_read_test", uvm_component parent = null);
+  function new(string name = "axi_bk_single_master_random_read_test", uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_bk_single_master_read_vseq::type_id::get());
+                                            axi_bk_single_master_random_read_vseq::type_id::get());
   endfunction
 endclass
 
 // non-blocking single master write test
-class axi_nbk_single_master_write_test extends axi_base_test;
-  `uvm_component_utils(axi_nbk_single_master_write_test)
+class axi_nbk_single_master_random_write_test extends axi_base_test;
+  `uvm_component_utils(axi_nbk_single_master_random_write_test)
 
-  function new(string name = "axi_nbk_single_master_write_test", uvm_component parent = null);
+  function new(string name = "axi_nbk_single_master_random_write_test",
+               uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_nbk_single_master_write_vseq::type_id::get());
+    uvm_config_db#(uvm_object_wrapper)::set(
+        this, "v_sqr.main_phase", "default_sequence",
+        axi_nbk_single_master_random_write_vseq::type_id::get());
   endfunction
 endclass
 
 // non-blocking single master read test
-class axi_nbk_single_master_read_test extends axi_base_test;
-  `uvm_component_utils(axi_nbk_single_master_read_test)
+class axi_nbk_single_master_random_read_test extends axi_base_test;
+  `uvm_component_utils(axi_nbk_single_master_random_read_test)
 
-  function new(string name = "axi_nbk_single_master_read_test", uvm_component parent = null);
+  function new(string name = "axi_nbk_single_master_random_read_test", uvm_component parent = null);
     super.new(name, parent);
   endfunction
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
-                                            axi_nbk_single_master_read_vseq::type_id::get());
+                                            axi_nbk_single_master_random_read_vseq::type_id::get());
   endfunction
 endclass
 
 
+// blocking single master directive write test
+class axi_bk_single_master_poll_write_test extends axi_base_test;
+  `uvm_component_utils(axi_bk_single_master_poll_write_test)
+
+  function new(string name = "axi_bk_single_master_poll_write_test", uvm_component parent = null);
+    super.new(name, parent);
+  endfunction
+
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+                                            axi_bk_single_master_poll_write_vseq::type_id::get());
+  endfunction
+endclass

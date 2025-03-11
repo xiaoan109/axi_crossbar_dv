@@ -7,6 +7,7 @@ class axi_master_base_sequence extends uvm_sequence #(axi_m_txn);
   int master_id = -1;
   static bit [3:0] wr_id[4];  // only lower 4 bits are used
   static bit [3:0] rd_id[4];  // only lower 4 bits are used
+  rand int dest = -1;
 
   function new(string name = "axi_base_sequence");
     super.new(name);
@@ -46,11 +47,9 @@ task axi_master_bk_wr_sequence::body();
     awsize == _4_BYTES;
     op_type == WRITE;
     transfer_type == BLOCKING_WRITE;
-    // awaddr == 64;  //temp
-    sa == master_id[1:0];  //temp
-    // da == 1;  //temp
+    sa == master_id[1:0];
+    if (dest != -1) da == dest[1:0];
   });
-  // TODO: masked id
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
   wr_id[master_id]++;
@@ -88,11 +87,9 @@ task axi_master_bk_rd_sequence::body();
     arsize == _4_BYTES;
     op_type == READ;
     transfer_type == BLOCKING_READ;
-    // araddr == 64;  //temp
-    sa == master_id[1:0];  //temp
-    // da == 1;  //temp
+    sa == master_id[1:0];
+    if (dest != -1) da == dest[1:0];
   });
-  // TODO: masked id
   req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
   rd_id[master_id]++;
@@ -127,7 +124,8 @@ task axi_master_nbk_wr_sequence::body();
     awsize == _4_BYTES;
     op_type == WRITE;
     transfer_type == NON_BLOCKING_WRITE;
-    sa == master_id[1:0];  //temp
+    sa == master_id[1:0];
+    if (dest != -1) da == dest[1:0];
   });
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
@@ -163,8 +161,12 @@ task axi_master_nbk_rd_sequence::body();
     arsize == _4_BYTES;
     op_type == READ;
     transfer_type == NON_BLOCKING_READ;
-    sa == master_id[1:0];  //temp
+    sa == master_id[1:0];
+    if (dest != -1) da == dest[1:0];
   });
+  if (dest != -1) begin
+    req.da = dest[1:0];
+  end
   req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
   rd_id[master_id]++;
@@ -320,19 +322,19 @@ task axi_base_vseq::body();
   `uvm_info("VSEQ", "Base virtual sequence end", UVM_MEDIUM)
 endtask
 
-class axi_bk_read_after_write_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_bk_read_after_write_vseq)
+class axi_bk_write_read_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_bk_write_read_vseq)
 
-  extern function new(string name = "axi_bk_read_after_write_vseq");
+  extern function new(string name = "axi_bk_write_read_vseq");
   extern virtual task body();
 endclass
 
 // virtual sequence: blocking read after write
-function axi_bk_read_after_write_vseq::new(string name = "axi_bk_read_after_write_vseq");
+function axi_bk_write_read_vseq::new(string name = "axi_bk_write_read_vseq");
   super.new(name);
 endfunction
 
-task axi_bk_read_after_write_vseq::body();
+task axi_bk_write_read_vseq::body();
   axi_master_bk_wr_sequence m_wr_seq[4];
   axi_master_bk_rd_sequence m_rd_seq[4];
   axi_slave_bk_wr_sequence  s_wr_seq[4];
@@ -393,18 +395,18 @@ endtask
 
 // virtual sequence: non-blocking read after write
 
-class axi_nbk_read_after_write_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_nbk_read_after_write_vseq)
+class axi_nbk_write_read_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_nbk_write_read_vseq)
 
-  extern function new(string name = "axi_nbk_read_after_write_vseq");
+  extern function new(string name = "axi_nbk_write_read_vseq");
   extern virtual task body();
 endclass
 
-function axi_nbk_read_after_write_vseq::new(string name = "axi_nbk_read_after_write_vseq");
+function axi_nbk_write_read_vseq::new(string name = "axi_nbk_write_read_vseq");
   super.new(name);
 endfunction
 
-task axi_nbk_read_after_write_vseq::body();
+task axi_nbk_write_read_vseq::body();
   axi_master_nbk_wr_sequence m_wr_seq[4];
   axi_master_nbk_rd_sequence m_rd_seq[4];
   axi_slave_nbk_wr_sequence  s_wr_seq[4];
@@ -462,18 +464,19 @@ task axi_nbk_read_after_write_vseq::body();
 endtask
 
 // virtual sequence: blocking single master write
-class axi_bk_single_master_write_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_bk_single_master_write_vseq)
+class axi_bk_single_master_random_write_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_bk_single_master_random_write_vseq)
 
-  extern function new(string name = "axi_bk_single_master_write_vseq");
+  extern function new(string name = "axi_bk_single_master_random_write_vseq");
   extern virtual task body();
 endclass
 
-function axi_bk_single_master_write_vseq::new(string name = "axi_bk_single_master_write_vseq");
+function axi_bk_single_master_random_write_vseq::new(
+    string name = "axi_bk_single_master_random_write_vseq");
   super.new(name);
 endfunction
 
-task axi_bk_single_master_write_vseq::body();
+task axi_bk_single_master_random_write_vseq::body();
   axi_master_bk_wr_sequence m_wr_seq;
   axi_slave_bk_wr_sequence  s_wr_seq [4];
   reset_event.wait_on();  // wait for reset
@@ -509,18 +512,19 @@ task axi_bk_single_master_write_vseq::body();
 endtask
 
 // virtual sequence: blocking single master read
-class axi_bk_single_master_read_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_bk_single_master_read_vseq)
+class axi_bk_single_master_random_read_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_bk_single_master_random_read_vseq)
 
-  extern function new(string name = "axi_bk_single_master_read_vseq");
+  extern function new(string name = "axi_bk_single_master_random_read_vseq");
   extern virtual task body();
 endclass
 
-function axi_bk_single_master_read_vseq::new(string name = "axi_bk_single_master_read_vseq");
+function axi_bk_single_master_random_read_vseq::new(
+    string name = "axi_bk_single_master_random_read_vseq");
   super.new(name);
 endfunction
 
-task axi_bk_single_master_read_vseq::body();
+task axi_bk_single_master_random_read_vseq::body();
   axi_master_bk_rd_sequence m_rd_seq;
   axi_slave_bk_rd_sequence  s_rd_seq [4];
   reset_event.wait_on();  // wait for reset
@@ -556,18 +560,19 @@ endtask
 
 
 // virtual sequence: non-blocking single master write
-class axi_nbk_single_master_write_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_nbk_single_master_write_vseq)
+class axi_nbk_single_master_random_write_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_nbk_single_master_random_write_vseq)
 
-  extern function new(string name = "axi_nbk_single_master_write_vseq");
+  extern function new(string name = "axi_nbk_single_master_random_write_vseq");
   extern virtual task body();
 endclass
 
-function axi_nbk_single_master_write_vseq::new(string name = "axi_nbk_single_master_write_vseq");
+function axi_nbk_single_master_random_write_vseq::new(
+    string name = "axi_nbk_single_master_random_write_vseq");
   super.new(name);
 endfunction
 
-task axi_nbk_single_master_write_vseq::body();
+task axi_nbk_single_master_random_write_vseq::body();
   axi_master_nbk_wr_sequence m_wr_seq;
   axi_slave_nbk_wr_sequence  s_wr_seq [4];
   reset_event.wait_on();  // wait for reset
@@ -600,18 +605,19 @@ task axi_nbk_single_master_write_vseq::body();
 endtask
 
 // virtual sequence: non-blocking single master read
-class axi_nbk_single_master_read_vseq extends axi_base_vseq;
-  `uvm_object_utils(axi_nbk_single_master_read_vseq)
+class axi_nbk_single_master_random_read_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_nbk_single_master_random_read_vseq)
 
-  extern function new(string name = "axi_nbk_single_master_read_vseq");
+  extern function new(string name = "axi_nbk_single_master_random_read_vseq");
   extern virtual task body();
 endclass
 
-function axi_nbk_single_master_read_vseq::new(string name = "axi_nbk_single_master_read_vseq");
+function axi_nbk_single_master_random_read_vseq::new(
+    string name = "axi_nbk_single_master_random_read_vseq");
   super.new(name);
 endfunction
 
-task axi_nbk_single_master_read_vseq::body();
+task axi_nbk_single_master_random_read_vseq::body();
   axi_master_nbk_rd_sequence m_rd_seq;
   axi_slave_nbk_rd_sequence  s_rd_seq [4];
   reset_event.wait_on();  // wait for reset
@@ -645,4 +651,53 @@ task axi_nbk_single_master_read_vseq::body();
   join
 endtask
 
+
+// virtual sequence: blocking single master poll write
+class axi_bk_single_master_poll_write_vseq extends axi_base_vseq;
+  `uvm_object_utils(axi_bk_single_master_poll_write_vseq)
+
+  extern function new(string name = "axi_bk_single_master_poll_write_vseq");
+  extern virtual task body();
+endclass
+
+function axi_bk_single_master_poll_write_vseq::new(
+    string name = "axi_bk_single_master_poll_write_vseq");
+  super.new(name);
+endfunction
+
+task axi_bk_single_master_poll_write_vseq::body();
+  axi_master_bk_wr_sequence m_wr_seq;
+  axi_slave_bk_wr_sequence  s_wr_seq [4];
+  reset_event.wait_on();  // wait for reset
+  reset_event.wait_off();
+
+  fork
+    begin : T1_SL_WR
+      for (int i = 0; i < 4; i++) begin
+        fork
+          automatic int j = i;
+          forever begin
+            `uvm_do_on(s_wr_seq[j], p_sequencer.s_wr_sequencer[j])
+          end
+        join_none
+      end
+    end
+  join_none
+
+  #100ns;
+
+  fork
+    begin : T1_WRITE
+      for (int i = 0; i < 4; i++) begin
+        for (int j = 0; j < 4; j++) begin
+          repeat (4) begin
+            `uvm_do_on_with(m_wr_seq, p_sequencer.m_wr_sequencer[i], {m_wr_seq.dest == j;})
+          end
+        end
+      end
+      #100ns;
+    end
+  join
+
+endtask
 

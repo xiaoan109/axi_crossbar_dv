@@ -163,6 +163,7 @@ task axi_master_monitor::wr_response_mon();
 
     // TODO: this only works for out of order transactions in certain case, i.e. (ID: 0x21, 0x22, 0x20)
     // currently dose not support case like (ID: 0x22, 0x20, 0x21)
+    // add line 220, may work well now
     if (local_wr_response_trans.bid != local_wr_addr_data_trans.awid) begin
       `uvm_error("M_MONITOR", "Write response ID does not match write address ID")
       `uvm_info("DEBUG_QUEUE",
@@ -215,6 +216,8 @@ task axi_master_monitor::wr_response_mon();
                         UVM_MEDIUM)
               $cast(wr_trans_clone, wr_trans.clone());
               axi4_master_write_response_analysis_port.write(wr_trans_clone);
+            end else begin
+              write_addr_data_buffer.push_back(local_wr_addr_data_trans);
             end
             i++;
           end
@@ -348,6 +351,8 @@ task axi_master_monitor::rd_data_response_mon();
                           UVM_MEDIUM)
                 $cast(rd_trans_clone, rd_trans.clone());
                 axi4_master_read_data_analysis_port.write(rd_trans_clone);
+              end else begin
+                read_addr_buffer.push_back(local_rd_addr_trans);
               end
               j++;
             end

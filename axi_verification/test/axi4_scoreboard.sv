@@ -435,7 +435,7 @@ task axi4_scoreboard::axi4_write_address();
       forever begin
         write_address_key.get(1);
         fork  // FIXME: find a right way to do this
-          // @axi4_master_write_address_event[j];
+          // @axi4_master_write_address_event[j]; // master goes first in AW channel
           @axi4_slave_write_address_event[j];
         join
         wait (axi4_slave_tx_q_h1[j].size() !== 0);
@@ -514,7 +514,7 @@ task axi4_scoreboard::axi4_write_data();
       forever begin
         write_data_key.get(1);
         fork
-          // @axi4_master_write_data_event[j];
+          // @axi4_master_write_data_event[j]; // master goes first in W channel
           @axi4_slave_write_data_event[j];
         join
         wait (axi4_slave_tx_q_h2[j].size() !== 0);
@@ -593,7 +593,7 @@ task axi4_scoreboard::axi4_write_response();
         write_response_key.get(1);
         fork
           @axi4_master_write_response_event[j];
-          // @axi4_slave_write_response_event[j];
+          // @axi4_slave_write_response_event[j]; // slave goes first in B channel
         join
         wait (axi4_slave_tx_q_h3[j].size() !== 0);
         `uvm_info(
@@ -668,7 +668,7 @@ task axi4_scoreboard::axi4_read_address();
       forever begin
         read_address_key.get(1);
         fork
-          // @axi4_master_read_address_event[j];
+          // @axi4_master_read_address_event[j]; // master goes first in AR channel
           @axi4_slave_read_address_event[j];
         join
         wait (axi4_slave_tx_q_h4[j].size() !== 0);
@@ -749,7 +749,7 @@ task axi4_scoreboard::axi4_read_data();
         read_data_key.get(1);
         fork
           @axi4_master_read_data_event[j];
-          // @axi4_slave_read_data_event[j];
+          // @axi4_slave_read_data_event[j]; // slave goes first in R channel
         join
         wait (axi4_slave_tx_q_h5[j].size() !== 0);
         `uvm_info("DEBUG_SCB", $sformatf(
@@ -1728,146 +1728,146 @@ function void axi4_scoreboard::check_phase(uvm_phase phase);
   // 3.Analysis fifos must be zero - This will indicate that all the packets have been compared
   //   This is to make sure that we have taken all packets from both FIFOs and made the comparisions
   //--------------------------------------------------------------------------------------------
-  // for (int i = 0; i < 4; i++) begin
-  //   if (axi4_master_write_address_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4 Master write address analysis FIFO[%0d] is empty", i), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_master_write_address_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_master_write_address_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Master write address analysis FIFO[%0d] is not empty", i));
-  //   end
+  for (int i = 0; i < 4; i++) begin
+    if (axi4_master_tx_q_h1[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4 Master write address analysis FIFO[%0d] is empty", i), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_master_write_address_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_master_tx_q_h1[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Master write address analysis FIFO[%0d] is not empty", i));
+    end
 
-  //   if (axi4_master_write_data_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Master write data analysis FIFO[%0d] is empty", i),
-  //               UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_master_write_data_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_master_write_data_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Master write data analysis FIFO[%0d] is not empty", i));
-  //   end
+    if (axi4_master_tx_q_h2[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Master write data analysis FIFO[%0d] is empty", i),
+                UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_master_write_data_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_master_tx_q_h2[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Master write data analysis FIFO[%0d] is not empty", i));
+    end
 
-  //   if (axi4_master_write_response_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4 Master write response analysis FIFO[%0d] is empty", i), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_master_write_response_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_master_write_response_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Master write response analysis FIFO[%0d] is not empty", i));
-  //   end
+    if (axi4_master_tx_q_h3[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4 Master write response analysis FIFO[%0d] is empty", i), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_master_write_response_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_master_tx_q_h3[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Master write response analysis FIFO[%0d] is not empty", i));
+    end
 
-  //   if (axi4_master_read_address_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Master read address analysis FIFO[%0d] is empty", i
-  //               ), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_master_read_address_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_master_read_address_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Master read address analysis FIFO[%0d] is not empty", i));
-  //   end
+    if (axi4_master_tx_q_h4[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Master read address analysis FIFO[%0d] is empty", i
+                ), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_master_read_address_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_master_tx_q_h4[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Master read address analysis FIFO[%0d] is not empty", i));
+    end
 
-  //   if (axi4_master_read_data_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Master read data analysis FIFO[%0d] is empty", i),
-  //               UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_master_read_data_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_master_read_data_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Master read data analysis FIFO[%0d] is not empty", i));
-  //   end
-
-
+    if (axi4_master_tx_q_h5[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Master read data analysis FIFO[%0d] is empty", i),
+                UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_master_read_data_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_master_tx_q_h5[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Master read data analysis FIFO[%0d] is not empty", i));
+    end
 
 
 
-  //   if (axi4_slave_write_address_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Slave write address analysis FIFO[%0d] is empty", i
-  //               ), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_slave_write_address_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_slave_write_address_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Slave write address analysis FIFO[%0d] is not empty", i));
-  //   end
-
-  //   if (axi4_slave_write_data_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Slave write data analysis FIFO[%0d] is empty", i),
-  //               UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_slave_write_data_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_slave_write_data_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Slave write data analysis FIFO[%0d] is not empty", i));
-  //   end
-
-  //   if (axi4_slave_write_response_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4 Slave write response analysis FIFO[%0d] is empty", i), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_slave_write_response_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_slave_write_response_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Slave write response analysis FIFO[%0d] is not empty", i));
-  //   end
-
-  //   if (axi4_slave_read_address_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Slave read address analysis FIFO[%0d] is empty", i
-  //               ), UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_slave_read_address_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_slave_read_address_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Slave read address analysis FIFO[%0d] is not empty", i));
-  //   end
-
-  //   if (axi4_slave_read_data_analysis_fifo[i].size() == 0) begin
-  //     `uvm_info(get_type_name(), $sformatf("axi4 Slave read data analysis FIFO[%0d] is empty", i),
-  //               UVM_HIGH);
-  //   end else begin
-  //     `uvm_info(get_type_name(), $sformatf(
-  //               "axi4_slave_read_data_analysis_fifo[%0d]:%0d",
-  //               i,
-  //               axi4_slave_read_data_analysis_fifo[i].size()
-  //               ), UVM_HIGH);
-  //     `uvm_error(get_type_name(), $sformatf(
-  //                "axi4 Slave read data analysis FIFO[%0d] is not empty", i));
-  //   end
 
 
-  //   `uvm_info(get_type_name(), $sformatf(
-  //             "--\n----------------------------------------------END OF SCOREBOARD CHECK PHASE---------------------------------------"
-  //             ), UVM_HIGH)
-  // end
+    if (axi4_slave_tx_q_h1[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Slave write address analysis FIFO[%0d] is empty", i
+                ), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_slave_write_address_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_slave_tx_q_h1[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Slave write address analysis FIFO[%0d] is not empty", i));
+    end
+
+    if (axi4_slave_tx_q_h2[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Slave write data analysis FIFO[%0d] is empty", i),
+                UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_slave_write_data_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_slave_tx_q_h2[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Slave write data analysis FIFO[%0d] is not empty", i));
+    end
+
+    if (axi4_slave_tx_q_h3[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4 Slave write response analysis FIFO[%0d] is empty", i), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_slave_write_response_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_slave_tx_q_h3[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Slave write response analysis FIFO[%0d] is not empty", i));
+    end
+
+    if (axi4_slave_tx_q_h4[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Slave read address analysis FIFO[%0d] is empty", i
+                ), UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_slave_read_address_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_slave_tx_q_h4[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Slave read address analysis FIFO[%0d] is not empty", i));
+    end
+
+    if (axi4_slave_tx_q_h5[i].size() == 0) begin
+      `uvm_info(get_type_name(), $sformatf("axi4 Slave read data analysis FIFO[%0d] is empty", i),
+                UVM_HIGH);
+    end else begin
+      `uvm_info(get_type_name(), $sformatf(
+                "axi4_slave_read_data_analysis_fifo[%0d]:%0d",
+                i,
+                axi4_slave_tx_q_h5[i].size()
+                ), UVM_HIGH);
+      `uvm_error(get_type_name(), $sformatf(
+                 "axi4 Slave read data analysis FIFO[%0d] is not empty", i));
+    end
+
+
+    `uvm_info(get_type_name(), $sformatf(
+              "--\n----------------------------------------------END OF SCOREBOARD CHECK PHASE---------------------------------------"
+              ), UVM_HIGH)
+  end
 endfunction : check_phase
 
 //--------------------------------------------------------------------------------------------
