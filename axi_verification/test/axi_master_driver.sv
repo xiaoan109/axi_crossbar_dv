@@ -234,7 +234,6 @@ endtask
 task axi_master_driver::wr_data(REQ wr_req);
   `uvm_info("M_DRIVER", "Driving W Channel", UVM_MEDIUM)
   @(vif.m_drv_cb);
-  //TODO: wtsrb changed according to addr alignment
   for (int i = 0; i < wr_req.awlen + 1; i++) begin
     vif.m_drv_cb.wvalid <= 1'b1;
     vif.m_drv_cb.wdata  <= wr_req.wdata[i];

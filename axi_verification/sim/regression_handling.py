@@ -41,7 +41,7 @@ for testname in reg_list_array:
 
   test_folder = testname + "_" + timestr
 
-  line = "make run_cov test_folder=" + test_folder + " test=" + testname + " verbosity=UVM_HIGH"
+  line = "make run test_folder=" + test_folder + " test=" + testname + " verbosity=UVM_HIGH" + " coverage=1"
   if debug:
     print(line)
   os.system(line)

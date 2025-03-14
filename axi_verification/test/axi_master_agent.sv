@@ -5,6 +5,7 @@ class axi_master_agent extends uvm_agent;
   axi_master_monitor monitor;
   axi_master_sequencer wr_sequencer;
   axi_master_sequencer rd_sequencer;
+  axi_master_coverage coverage;
 
   axi_vif vif;
   int master_id = -1;
@@ -38,6 +39,8 @@ function void axi_master_agent::build_phase(uvm_phase phase);
     wr_sequencer = axi_master_sequencer::type_id::create("wr_sequencer", this);
     rd_sequencer = axi_master_sequencer::type_id::create("rd_sequencer", this);
   end
+  // TODO: add has_coverage to control
+  coverage = axi_master_coverage::type_id::create("coverage", this);
 endfunction
 
 function void axi_master_agent::connect_phase(uvm_phase phase);
@@ -46,4 +49,10 @@ function void axi_master_agent::connect_phase(uvm_phase phase);
     driver.wr_seq_item_port.connect(wr_sequencer.seq_item_export);
     driver.rd_seq_item_port.connect(rd_sequencer.seq_item_export);
   end
+  // TODO: add has_coverage to control
+  monitor.axi4_master_write_address_analysis_port.connect(coverage.analysis_export);
+  monitor.axi4_master_write_data_analysis_port.connect(coverage.analysis_export);
+  monitor.axi4_master_write_response_analysis_port.connect(coverage.analysis_export);
+  monitor.axi4_master_read_address_analysis_port.connect(coverage.analysis_export);
+  monitor.axi4_master_read_data_analysis_port.connect(coverage.analysis_export);
 endfunction

@@ -436,13 +436,9 @@ task axi4_scoreboard::axi4_write_address();
         write_address_key.get(1);
         fork  // FIXME: find a right way to do this
           // @axi4_master_write_address_event[j]; // master goes first in AW channel
-          @axi4_slave_write_address_event[j];
+          @(axi4_slave_write_address_event[j]);
         join
         wait (axi4_slave_tx_q_h1[j].size() !== 0);
-        `uvm_info(
-            "DEBUG_SCB", $sformatf(
-            "Inside axi4_write_address, queue_h1[%0d] size = %0d", j, axi4_slave_tx_q_h1[j].size()),
-            UVM_HIGH)
         q_len[j] = axi4_slave_tx_q_h1[j].size();
         for (int k = q_len[j] - 1; k >= 0; k--) begin
           idx[j] = axi4_master_tx_q_h1[j].find_index() with (item.awid ==axi4_slave_tx_q_h1[j][k].awid);
@@ -515,13 +511,9 @@ task axi4_scoreboard::axi4_write_data();
         write_data_key.get(1);
         fork
           // @axi4_master_write_data_event[j]; // master goes first in W channel
-          @axi4_slave_write_data_event[j];
+          @(axi4_slave_write_data_event[j]);
         join
         wait (axi4_slave_tx_q_h2[j].size() !== 0);
-        `uvm_info(
-            "DEBUG_SCB", $sformatf(
-            "Inside axi4_write_data, queue_h2[%0d] size = %0d", j, axi4_slave_tx_q_h2[j].size()),
-            UVM_HIGH)
         q_len[j] = axi4_slave_tx_q_h2[j].size();
         for (int k = q_len[j] - 1; k >= 0; k--) begin
           idx[j] = axi4_master_tx_q_h2[j].find_index() with (item.awid ==axi4_slave_tx_q_h2[j][k].awid);
@@ -592,14 +584,10 @@ task axi4_scoreboard::axi4_write_response();
       forever begin
         write_response_key.get(1);
         fork
-          @axi4_master_write_response_event[j];
+          @(axi4_master_write_response_event[j]);
           // @axi4_slave_write_response_event[j]; // slave goes first in B channel
         join
         wait (axi4_slave_tx_q_h3[j].size() !== 0);
-        `uvm_info(
-            "DEBUG_SCB", $sformatf(
-            "Inside axi4_write_response, queue_h3[%0d] size = %0d", j, axi4_slave_tx_q_h3[j].size()
-            ), UVM_HIGH)
         q_len[j] = axi4_slave_tx_q_h3[j].size();
         for (int k = q_len[j] - 1; k >= 0; k--) begin
           idx[j] = axi4_master_tx_q_h3[j].find_index() with (item.awid ==axi4_slave_tx_q_h3[j][k].awid);
@@ -669,13 +657,9 @@ task axi4_scoreboard::axi4_read_address();
         read_address_key.get(1);
         fork
           // @axi4_master_read_address_event[j]; // master goes first in AR channel
-          @axi4_slave_read_address_event[j];
+          @(axi4_slave_read_address_event[j]);
         join
         wait (axi4_slave_tx_q_h4[j].size() !== 0);
-        `uvm_info(
-            "DEBUG_SCB", $sformatf(
-            "Inside axi4_read_address, queue_h4[%0d] size = %0d", j, axi4_slave_tx_q_h4[j].size()),
-            UVM_HIGH)
         q_len[j] = axi4_slave_tx_q_h4[j].size();
         for (int k = q_len[j] - 1; k >= 0; k--) begin
           idx[j] = axi4_master_tx_q_h4[j].find_index() with (item.arid ==axi4_slave_tx_q_h4[j][k].arid);
@@ -748,13 +732,10 @@ task axi4_scoreboard::axi4_read_data();
       forever begin
         read_data_key.get(1);
         fork
-          @axi4_master_read_data_event[j];
+          @(axi4_master_read_data_event[j]);
           // @axi4_slave_read_data_event[j]; // slave goes first in R channel
         join
         wait (axi4_slave_tx_q_h5[j].size() !== 0);
-        `uvm_info("DEBUG_SCB", $sformatf(
-                  "Inside axi4_read_data, queue_h5[%0d] size = %0d", j, axi4_slave_tx_q_h5[j].size()
-                  ), UVM_HIGH)
         q_len[j] = axi4_slave_tx_q_h5[j].size();
         for (int k = q_len[j] - 1; k >= 0; k--) begin
           idx[j] = axi4_master_tx_q_h5[j].find_index() with (item.arid ==axi4_slave_tx_q_h5[j][k].arid);

@@ -91,6 +91,7 @@ task axi_master_monitor::wr_address_mon();
     local_wr_addr_trans = axi_m_txn::type_id::create("local_wr_addr_trans");
     @(vif.m_mon_cb iff vif.m_mon_cb.awvalid == 1'b1 && vif.m_mon_cb.awready == 1'b1);
     local_wr_addr_trans.op_type = WRITE;
+    local_wr_addr_trans.transfer_type = transfer_type_e'(vif.m_mon_cb.awuser); // user signal to indicate transfer type
     local_wr_addr_trans.awaddr = vif.m_mon_cb.awaddr;
     local_wr_addr_trans.awsize = size_e'(vif.m_mon_cb.awsize);
     local_wr_addr_trans.awlen = vif.m_mon_cb.awlen;
@@ -248,6 +249,7 @@ task axi_master_monitor::rd_address_mon();
     local_rd_addr_trans = axi_m_txn::type_id::create("local_rd_addr_trans");
     @(vif.m_mon_cb iff vif.m_mon_cb.arvalid == 1'b1 && vif.m_mon_cb.arready == 1'b1);
     local_rd_addr_trans.op_type = READ;
+    local_rd_addr_trans.transfer_type = transfer_type_e'(vif.m_mon_cb.aruser); // user signal to indicate transfer type
     local_rd_addr_trans.araddr = vif.m_mon_cb.araddr;
     local_rd_addr_trans.arsize = size_e'(vif.m_mon_cb.arsize);
     local_rd_addr_trans.arlen = vif.m_mon_cb.arlen;

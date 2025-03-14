@@ -36,7 +36,7 @@ module tb_top ();
       .MST_PIPELINE   (0),
       .SLV_PIPELINE   (0),
       .AXI_SIGNALING  (1),                // AXI Full
-      .USER_SUPPORT   (0),
+      .USER_SUPPORT   (1),
       .AXI_AUSER_W    (AXI_USER_W),
       .AXI_WUSER_W    (AXI_USER_W),
       .AXI_BUSER_W    (AXI_USER_W),
@@ -471,10 +471,11 @@ module tb_top ();
     run_test();
   end
 
-  initial begin
-    $dumpvars;
-    $dumpfile("dump.vcd");
-  end
 
+  initial begin
+    $fsdbDumpfile("sim.fsdb");
+    $fsdbDumpvars();
+    $fsdbDumpSVA();
+  end
 
 endmodule

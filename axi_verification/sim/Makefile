@@ -1,186 +1,120 @@
-UVM_HOME=D:/Tools/questasim64_2021.1/verilog_src/uvm-1.2
-UVM_DPI_HOME=D:/Tools/questasim64_2021.1/uvm-1.2/win64
-verbosity=UVM_MEDIUM
-test=axi_base_test
-plus=
-FILELIST=filelist.f
-TOP=tb_top
-REPO_ROOT=..
-RTL_PATH=$(REPO_ROOT)/src
-TEST_PATH=$(REPO_ROOT)/test
-PACKAGE_PATH=$(TEST_PATH)/packages
-INCLUDE_PATH=+incdir+$(TEST_PATH)
-WAVE_DO_FILE=wave.do
-SUPPRESS_MULTI_DRIVEN=-suppress 3839
-SEED=random
-testlist_name=$(REPO_ROOT)/testlists/testlist.f
-# Setting the default test folder to test name 
+# Makefile for VCS
+
+CES64 = TRUE
+LD_LIBRARY_PATH = ${NOVAS_HOME}/share/PLI/VCS/LINUX
+
+test = axi_base_test
+root_path = ${shell pwd}/..
+program_path = ${root_path}/test/programs
+# PROGRAM_TOP = ${program_path}/test.sv
+package_path = ${root_path}/test/packages
+PACKAGES = ${package_path}/axi_globals_pkg.sv ${package_path}/axi_stimulus_pkg.sv ${package_path}/axi_env_pkg.sv ${package_path}/axi_test_pkg.sv
+TEST_TOP = ${PACKAGES} ${PROGRAM_TOP}
+HARNESS_TOP = ${root_path}/test/tb_top.sv
+
+rtl_path = ${root_path}/src
+DUT = ${shell find ${rtl_path} -name "*.v" -o -name "*.sv"}
+
+INCDIR = ${rtl_path}+${root_path}/test
+
+TOP = ${TEST_TOP} ${HARNESS_TOP}
+log = simv.log
+verbosity = UVM_MEDIUM
+uvm_ver = uvm-1.2
+seed = 1
+defines = 
+uvm_defines = UVM_NO_DEPRECATED+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+plus = 
+option = UVM_TR_RECORD + UVM_LOG_RECORD
+trace = 
+#trace = UVM_OBJECTION_TRACE
+testlist_name = testlist.f
 ifndef test_folder
-override test_folder = $(test)
+override test_folder = ${test}
 endif
 
-.IGNORE:
-	compile
-	compile_cov
-	run
-	run_cov
-# WE can also use the target where we WANT the silent mode 
-.SILENT:
-	compile
-	compile_cov
-	run
-	run_cov
-	help
+compile_switches = -sverilog -lca -debug_access+all -kdb +vcs+vcdpluson -timescale="1ns/100ps" -l comp.log -ntb_opts ${uvm_ver} ${DUT} ${TOP} +define+${uvm_defines}+${defines} \
+									 +incdir+${INCDIR} \
+									 -assert svaext \
+									 -assert enable_diag \
+									 -assert vpiSeqBeginTime \
+							     -assert vpiSeqFail \
+                   -assert enable_hier
+runtime_switches = -l ${test_folder}/${log} +UVM_TESTNAME=${test} +UVM_VERBOSITY=${verbosity} +${plus} +${trace} +${option} \
+									 +fsdb+sva_success \
+                   -assert success
 
-help:
-	echo "[filelist]: create filelist.f"
-	echo "[work]: create work lib"
-	echo "[compile]: compile verilog & system verilog files in FILELIST"
-	echo "[run]: start simulation in questasim batch mode"
-	echo "[rung]: start simulation in questasim gui mode"
+ifdef coverage
+	compile_switches += -cm line+tgl+cond+branch+assert+fsm
+	runtime_switches += -cm line+tgl+cond+branch+assert+fsm
+endif
 
-all: filelist work compile run
+# seq = uvm_reg_bit_bash_seq
 
-filelist:
-	rm $(FILELIST) -rf
-	find $(RTL_PATH) -name "*.sv" >> $(REPO_ROOT)/sim/filelist.f
-	find $(PACKAGE_PATH) -name "*globals_pkg.sv" >> $(REPO_ROOT)/sim/filelist.f
-	find $(PACKAGE_PATH) -name "*stimulus_pkg.sv" >> $(REPO_ROOT)/sim/filelist.f
-	find $(PACKAGE_PATH) -name "*env_pkg.sv" >> $(REPO_ROOT)/sim/filelist.f
-	find $(PACKAGE_PATH) -name "*test_pkg.sv" >> $(REPO_ROOT)/sim/filelist.f
-	find $(TEST_PATH) -name "tb_top.sv" >> $(REPO_ROOT)/sim/filelist.f
+all: simv run
 
-work:
-	vlib work
-
-compile: filelist
-	vlog  +incdir+$(UVM_HOME)/src \
-		$(UVM_HOME)/src/uvm_pkg.sv \
-		-f $(FILELIST) $(INCLUDE_PATH) \
-		-l comp.log
-	make compile_war_err
-
-compile_cov: filelist
-	vlog  +incdir+$(UVM_HOME)/src \
-		$(UVM_HOME)/src/uvm_pkg.sv \
-		-f $(FILELIST) $(INCLUDE_PATH) \
-		-l comp.log \
-		+acc \
-		+cover \
-		+fcover	
-	make compile_war_err
+simv compile: ${DUT} ${TOP}
+ifeq (${CES64},TRUE)
+	vcs -full64 ${compile_switches}
+	@echo "Compiled in 64-bit mode"
+else
+	vcs ${compile_switches}
+	@echo "Compiled in 32-bit mode"
+endif
 
 run:
-	mkdir $(test_folder)
-	vsim -voptargs=+acc=npr $(SUPPRESS_MULTI_DRIVEN) \
-		-sv_seed $(SEED) -c \
-		-classdebug -sv_lib $(UVM_DPI_HOME)/uvm_dpi \
-		work.$(TOP) -do "log -r /*; add wave -r /*; run -all; exit" \
-		-l  $(test_folder)/$(test).log \
-		+UVM_VERBOSITY=$(verbosity) \
-		+UVM_TESTNAME=$(test) \
-		+$(plus) \
-		-wlf $(test_folder)/waveform.wlf
-	# For checking and reporting compilation errors	
-	make simulate_war_err
+ifeq (${wildcard ${test_folder}},)
+	mkdir ${test_folder}
+endif
+	./simv +ntb_random_seed=${seed} ${runtime_switches} +seq=${seq}
+	cp sim.fsdb ${test_folder}/sim.fsdb
+ifdef coverage
+	cp -r simv.vdb ${test_folder}/simv.vdb
+endif
 
-rung:
-	mkdir $(test_folder)
-	vsim -voptargs=+acc=npr $(SUPPRESS_MULTI_DRIVEN) \
-		-sv_seed $(SEED) -classdebug \
-		-sv_lib $(UVM_DPI_HOME)/uvm_dpi \
-		work.$(TOP) -do "do wave.do" \
-		-l  $(test_folder)/$(test).log \
-		+UVM_VERBOSITY=$(verbosity) \
-		+UVM_TESTNAME=$(test) \
-		+$(plus) 
-
-run_cov:
-	mkdir $(test_folder)
-	vsim -voptargs=+acc=npr $(SUPPRESS_MULTI_DRIVEN) \
-		-sv_seed $(SEED) -c \
-		-assertdebug \
-		-classdebug -sv_lib $(UVM_DPI_HOME)/uvm_dpi \
-		work.$(TOP) -do "log -r /*; add wave -r /*; coverage save -onexit -assert -directive -cvg -codeAll $(test_folder)/$(test)_coverage.ucdb; run -all; exit" \
-		-l  $(test_folder)/$(test).log \
-		+UVM_VERBOSITY=$(verbosity) \
-		+UVM_TESTNAME=$(test) \
-		+$(plus) \
-		-sva \
-		-coverage \
-		-wlf $(test_folder)/waveform.wlf
-	# For checking and reporting simulation errors
-	make simulate_war_err
-	# For coverage report in HTML format 
-	vcover report -html $(test_folder)/$(test)_coverage.ucdb -output $(test_folder)/html_cov_report -details
+random: simv
+	./simv +ntb_random_seed_automatic ${runtime_switches} +seq=${seq}
 
 regression:
 	python regression_handling.py $(testlist_name)
-	make merge_cov_report
+	urg -full64 -dir *_test*/simv.vdb -dbname merged/simv.vdb
+	
 
+# ral:
+# 	ralgen -uvm -t host_regmodel host.ralf
 
-view_wave:
-	vsim -view $(test_folder)/waveform.wlf -do wave.do &
+cover:
+	urg -full64 -dir simv.vdb
+	urg -full64 -dir simv.vdb -format text
 
-view_cov:
-	vsim -viewcov $(test_folder)/$(test)_coverage.ucdb &
+# dve:
+# 	dve -vpd vcdplus.vpd -session debug_files/$(tcl) &
+# 
+# dve_tr:
+# 	./simv +ntb_random_seed=$(seed) ${runtime_switches}
+# 	dve -vpd vcdplus.vpd -session debug_files/$(tr) &
+# 
+# dve_i: simv
+# 	./simv -gui=dve +ntb_random_seed=$(seed) ${runtime_switches} +seq=${seq} &
+# 
+verdi:
+	verdi -ssf ${test_folder}/sim.fsdb &
+# 
+# verdi_tr:
+# 	./simv +ntb_random_seed=$(seed) ${runtime_switches} +UVM_VERDI_TRACE
+# 	verdi -play debug_files/${cmd} -nologo & 
+# 
+# verdi_i: simv
+# 	./simv -gui=verdi +seq=${seq} +ntb_random_seed=$(seed) ${runtime_switches} +UVM_VERDI_TRACE &
 
-merge_cov_report:
-	mkdir merged
-	vcover merge merged/merged_coverage.ucdb -64 */*.ucdb
-	vcover report -html merged/merged_coverage.ucdb -output merged/merged_cov_html_report -details
+verdi_cov:
+	verdi -cov -covdir ${test_folder}/simv.vdb &
 
-view_cov_merged:
-	vsim -viewcov merged/merged_coverage.ucdb &
-
-
-
-compile_war_err:
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "------------------- Compilation Report --------------------------";
-	echo "";
-	grep "^** " comp.log;
-	echo "";
-	grep "^Error" comp.log;
-	echo "";
-	echo "Log file path: comp.log"
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "-----------------------------------------------------------------";
-	echo "";
-
-simulate_war_err:
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "-------------------- Simulation Report --------------------------";
-	echo "";
-	echo "Simulator Errors";
-	grep "Error" $(test_folder)/$(test).log;
-	echo "";
-	echo "UVM Fatal";
-	grep "UVM_FATAL" $(test_folder)/$(test).log;
-	echo "";
-	echo "UVM Errors";
-	grep "UVM_ERROR" $(test_folder)/$(test).log;
-	echo "";
-	echo "UVM Warnings";
-	grep "UVM_WARNING" $(test_folder)/$(test).log;
-	echo "";
-	echo "Testname: $(test)"
-	echo "";
-	echo "Log file path: $(test_folder)/$(test).log"
-	echo "";
-	echo "Waveform: vsim -view $(test_folder)/waveform.wlf &"
-	echo "";
-	echo "Coverage report: firefox $(test_folder)/html_cov_report/index.html &"
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "-----------------------------------------------------------------";
-	echo "";
+verdi_merged:
+	verdi -cov -covdir merged/simv.vdb &
 
 clean:
-	rm -rf work *.log transcript $(FILELIST) *.wlf
-	rm -rf *_test* merged
-
-.PHONY: filelist work compile compile_cov run rung run_cov clean
+	rm -rf csrc *.vdb *.vcd *.fsdb *.vpd \
+	simv simv.daidir ucli.key vc_hdrs.h *.log \
+	urgReport verdiLog novas.* vdCovLog \
+	*_test* merged

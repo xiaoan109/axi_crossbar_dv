@@ -8,6 +8,8 @@ class axi_mst_txn #(
   typedef axi_mst_txn#(AXI_DATA_W, AXI_ADDR_W, AXI_ID_W) this_type_t;
   `uvm_object_param_utils(this_type_t)
 
+  localparam STROBE_WIDTH = AXI_DATA_W / 8;
+
   rand tx_type_e                          op_type;
   rand transfer_type_e                    transfer_type;  // Blocking or Non-blocking
   // Write transaction
@@ -335,77 +337,231 @@ function void axi_mst_txn::do_print(uvm_printer printer);
   printer.print_field("da", da, $bits(da), UVM_DEC);
 endfunction
 
-// For wstrb
+
+//--------------------------------------------------------------------------------------------
+// Function : post_randomize 
+// Implements the narrow transfers and unalligned transfers
+//--------------------------------------------------------------------------------------------
 function void axi_mst_txn::post_randomize();
-  int start_addr;
-  int size;  // transfer size in bytes
-  int data_bytes;  // data bus width in bytes
-  int aligned_addr;
-  int burst_length;
-  int contaniner_size;
-  int address_1;
-  int address_N[];
-  int lower_wrap_boundary;
-  int upper_wrap_boundary;
-  int lower_byte_lane;
-  int upper_byte_lane;
+//-------------------------------------------------------
+// Strobes for alligned with narrow transfers and
+// Unalligned transfers
+//-------------------------------------------------------
+begin //{
+  bit[STROBE_WIDTH-1:0]  remainder_check;
+  // strobe_data provides you the strobe for starting addr
+  bit [STROBE_WIDTH-1:0] strobe_data[int][1];
 
-  start_addr = awaddr;
-  size = (1 << awsize);
-  data_bytes = AXI_DATA_W / 8;
-  burst_length = awlen + 1;
-  contaniner_size = size * burst_length;
-  aligned_addr = (int'(start_addr / size)) * size;
-  address_1 = start_addr;
-  address_N = new[burst_length];
+  // for awsize =0 which means 1B need to transfer 
+  // for this case always addrs will be alligned
+  // because remainder always be 0... in this case
 
-  if (awburst == FIXED) begin
-    for (int i = 0; i < burst_length; i++) begin
-      address_N[i] = start_addr;
+  bit [STROBE_WIDTH-1:0] local_addr;
+  bit [STROBE_WIDTH-1:0] min;
+  bit [STROBE_WIDTH-1:0] shift_loc;
+
+  remainder_check = (awaddr%(STROBE_WIDTH));
+  min = (awsize == 1) ? {2{1'b1}} : ((awsize == 2) ? {4{1'b1}} : ((awsize == 3) ? {8{1'b1}} :
+  ((awsize == 4) ? {16{1'b1}} : ((awsize == 5) ? {32{1'b1}} : ((awsize == 6) ? {64{1'b1}} : {128{1'b1}})))));
+
+  for(int l=0;l<STROBE_WIDTH;l++) begin
+    if((remainder_check+l)%2**awsize == 0) begin
+      shift_loc = remainder_check+l;
+      break;
     end
-  end else if (awburst == INCR) begin
-    for (int i = 0; i < burst_length; i++) begin
-      address_N[i] = aligned_addr + (i * size);
+  end
+  if(awsize == 0) begin
+    strobe_data[STROBE_WIDTH][0][remainder_check] = 1'b1;
+  end
+  else begin
+    if(awaddr % 2**awsize != 0) begin
+        unique case(awsize)
+          1: strobe_data[STROBE_WIDTH][0] = 1'b1 << remainder_check;
+          2: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (4*(awaddr/2**awsize)+4));
+          3: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (8*(awaddr/2**awsize)+8));
+          4: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (16*(awaddr/2**awsize)+16));
+          5: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (32*(awaddr/2**awsize)+32));
+          6: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (64*(awaddr/2**awsize)+64));
+          7: strobe_data[STROBE_WIDTH][0] = ({STROBE_WIDTH{1'b1}} << remainder_check) & ~({STROBE_WIDTH{1'b1}} << (128*(awaddr/2**awsize)+128));
+        endcase
     end
-  end else if (awburst == WRAP) begin
-    start_addr = aligned_addr;
-    lower_wrap_boundary = (int'(start_addr / contaniner_size)) * contaniner_size;
-    upper_wrap_boundary = lower_wrap_boundary + contaniner_size;
-    for (int i = 0; i < burst_length; i++) begin
-      address_N[i] = aligned_addr + (i * size);
-      if (address_N[i] >= upper_wrap_boundary) begin
-        address_N[i] = lower_wrap_boundary;
-        for (int j = i + 1; j < burst_length; j++) begin
-          address_N[j] = start_addr + (j * size) - contaniner_size;
-        end
-        break;
+    else begin  //{ alligned address
+        unique case(awsize)
+          1: strobe_data[STROBE_WIDTH][0] = 2'b11 << remainder_check;
+          2: strobe_data[STROBE_WIDTH][0] = 4'b1111 << remainder_check; 
+          3: strobe_data[STROBE_WIDTH][0] = 8'b1111_1111 << remainder_check; 
+          4: strobe_data[STROBE_WIDTH][0] = {16{1'b1}} << remainder_check; 
+          5: strobe_data[STROBE_WIDTH][0] = {32{1'b1}} << remainder_check; 
+          6: strobe_data[STROBE_WIDTH][0] = {64{1'b1}} << remainder_check; 
+          7: strobe_data[STROBE_WIDTH][0] = {128{1'b1}} << remainder_check; 
+        endcase
+    end //}
+  end
+  if(awaddr%2**awsize != 0) begin
+    for(int i=0;i<wstrb.size();i++) begin
+      if(awsize == 0) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1]) wstrb[i] = local_addr|1'b1;
+        else wstrb[i] = wstrb[i-1] << 1; 
+      end
+      if(awsize == 1) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|2'b11) : min << remainder_check+1 ;
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>1) wstrb[i] = local_addr|2'b11;
+        else wstrb[i] = wstrb[i-1] << 2; 
+      end
+      if(awsize == 2) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|4'b1111) : (min << shift_loc);
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|4'b1111; 
+        else wstrb[i] = wstrb[i-1] << 4; 
+      end
+      if(awsize == 3) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|8'b1111_1111) : (min << shift_loc);
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>1) wstrb[i] = local_addr|8'b1111_1111;
+        else wstrb[i] = wstrb[i-1] << 8; 
+      end
+      if(awsize == 4) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|16'b1111_1111_1111_1111) : (min << shift_loc);
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>1) wstrb[i] = local_addr|16'b1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 16; 
+      end
+      if(awsize == 5) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|32'b1111_1111_1111_1111_1111_1111_1111_1111) : (min << shift_loc);
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>1) wstrb[i] = local_addr|32'b1111_1111_1111_1111_1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 32; 
+      end
+      if(awsize == 6) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(i==1) wstrb[i] =  (wstrb[i-1][STROBE_WIDTH-1]) ? (local_addr|64'b1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111) : (min << shift_loc);
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>1) wstrb[i] = local_addr|64'b1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 64; 
+      end
+      if(awsize == 7) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else  wstrb[i] = local_addr|128'b1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
       end
     end
   end
-
-  foreach (wstrb[i]) begin
-    wstrb[i] = 0;
-    if (i == 0) begin
-      lower_byte_lane = start_addr - (int'(start_addr / data_bytes)) * data_bytes;
-      upper_byte_lane = aligned_addr + (size - 1) - (int'(start_addr / data_bytes)) * data_bytes;
-      for (int j = lower_byte_lane; j <= upper_byte_lane; j++) begin
-        wstrb[i][j] = 1;
-        // $display(
-        //     "FIRST TRANSFER     i=%d,j=%d,start_address=%d,lower_byte_lane=%d,upper_byte_lane=%d",
-        //     i, j, start_addr, lower_byte_lane, upper_byte_lane);
+  else begin 
+    for(int i=0;i<wstrb.size();i++) begin
+      if(awsize == 0) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1]) wstrb[i] = local_addr|1'b1;
+        else wstrb[i] = wstrb[i-1] << 1; 
       end
-    end else begin
-      lower_byte_lane = address_N[i] - (int'(address_N[i] / data_bytes)) * data_bytes;
-      upper_byte_lane = lower_byte_lane + size - 1;
-      for (int j = lower_byte_lane; j <= upper_byte_lane; j++) begin
-        wstrb[i][j] = 1;
-        // $display(
-        //     "REMAINING TRANSFER i=%d,j=%d,next_address=%d,lower_byte_lane=%d,upper_byte_lane=%d",
-        //     i, j, address_N[i], lower_byte_lane, upper_byte_lane);
+      if(awsize == 1) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|2'b11;
+        else wstrb[i] = wstrb[i-1] << 2; 
+      end
+      if(awsize == 2) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|4'b1111;
+        else wstrb[i] = wstrb[i-1] << 4; 
+      end
+      if(awsize == 3) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|8'b1111_1111;
+        else wstrb[i] = wstrb[i-1] << 8; 
+      end
+      if(awsize == 4) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|16'b1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 16; 
+      end
+      if(awsize == 5) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|32'b1111_1111_1111_1111_1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 32; 
+      end
+      if(awsize == 6) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else if(wstrb[i-1][STROBE_WIDTH-1] && i>0) wstrb[i] = local_addr|64'b1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
+        else wstrb[i] = wstrb[i-1] << 64; 
+      end
+      if(awsize == 7) begin
+        if(i==0)  wstrb[0] = strobe_data[STROBE_WIDTH][0];
+        else wstrb[i] = local_addr|128'b1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111;
       end
     end
   end
-endfunction
+end //}
+endfunction : post_randomize
+
+// function void axi_mst_txn::post_randomize();
+//   int start_addr;
+//   int size;  // transfer size in bytes
+//   int data_bytes;  // data bus width in bytes
+//   int aligned_addr;
+//   int burst_length;
+//   int contaniner_size;
+//   int address_1;
+//   int address_N[];
+//   int lower_wrap_boundary;
+//   int upper_wrap_boundary;
+//   int lower_byte_lane;
+//   int upper_byte_lane;
+// 
+//   start_addr = awaddr;
+//   size = (1 << awsize);
+//   data_bytes = AXI_DATA_W / 8;
+//   burst_length = awlen + 1;
+//   contaniner_size = size * burst_length;
+//   aligned_addr = (int'(start_addr / size)) * size;
+//   address_1 = start_addr;
+//   address_N = new[burst_length];
+// 
+//   if (awburst == FIXED) begin
+//     for (int i = 0; i < burst_length; i++) begin
+//       address_N[i] = start_addr;
+//     end
+//   end else if (awburst == INCR) begin
+//     for (int i = 0; i < burst_length; i++) begin
+//       address_N[i] = aligned_addr + (i * size);
+//     end
+//   end else if (awburst == WRAP) begin
+//     start_addr = aligned_addr;
+//     lower_wrap_boundary = (int'(start_addr / contaniner_size)) * contaniner_size;
+//     upper_wrap_boundary = lower_wrap_boundary + contaniner_size;
+//     for (int i = 0; i < burst_length; i++) begin
+//       address_N[i] = aligned_addr + (i * size);
+//       if (address_N[i] >= upper_wrap_boundary) begin
+//         address_N[i] = lower_wrap_boundary;
+//         for (int j = i + 1; j < burst_length; j++) begin
+//           address_N[j] = start_addr + (j * size) - contaniner_size;
+//         end
+//         break;
+//       end
+//     end
+//   end
+// 
+//   foreach (wstrb[i]) begin
+//     wstrb[i] = 0;
+//     if (i == 0) begin
+//       lower_byte_lane = start_addr - (int'(start_addr / data_bytes)) * data_bytes;
+//       upper_byte_lane = aligned_addr + (size - 1) - (int'(start_addr / data_bytes)) * data_bytes;
+//       for (int j = lower_byte_lane; j <= upper_byte_lane; j++) begin
+//         wstrb[i][j] = 1;
+//         // $display(
+//         //     "FIRST TRANSFER     i=%d,j=%d,start_address=%d,lower_byte_lane=%d,upper_byte_lane=%d",
+//         //     i, j, start_addr, lower_byte_lane, upper_byte_lane);
+//       end
+//     end else begin
+//       lower_byte_lane = address_N[i] - (int'(address_N[i] / data_bytes)) * data_bytes;
+//       upper_byte_lane = lower_byte_lane + size - 1;
+//       for (int j = lower_byte_lane; j <= upper_byte_lane; j++) begin
+//         wstrb[i][j] = 1;
+//         // $display(
+//         //     "REMAINING TRANSFER i=%d,j=%d,next_address=%d,lower_byte_lane=%d,upper_byte_lane=%d",
+//         //     i, j, address_N[i], lower_byte_lane, upper_byte_lane);
+//       end
+//     end
+//   end
+// endfunction
 
 function string axi_mst_txn::convert2string();
   string s;
