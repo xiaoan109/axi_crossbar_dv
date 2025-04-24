@@ -15,5 +15,6 @@ package axi_stimulus_pkg;
 
   `include "axi_virtual_sequencer.sv"
   `include "axi_base_sequence.sv"
+  `include "axi_seq_lib.sv"
 
 endpackage
