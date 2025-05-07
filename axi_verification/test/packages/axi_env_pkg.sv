@@ -5,9 +5,9 @@ package axi_env_pkg;
   import axi_globals_pkg::*;
   import axi_stimulus_pkg::*;
 
-  `include "axi_master_agent_config.sv"
-  `include "axi_slave_agent_config.sv"
-  `include "axi_env_config.sv"
+  // `include "axi_master_agent_config.sv"
+  // `include "axi_slave_agent_config.sv"
+  // `include "axi_env_config.sv"
 
   `include "axi_master_driver.sv"
   `include "axi_master_monitor.sv"

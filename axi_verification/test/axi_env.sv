@@ -14,7 +14,6 @@ class axi_env extends uvm_env;
   // Handle for axi_slave agent configuration
   axi_slave_agent_config slave_agent_cfg[];
   // TODO: Add reference model
-  // TODO: Add coverage collector
 
 
   function new(string name = "axi_env", uvm_component parent = null);
@@ -74,6 +73,8 @@ function void axi_env::build_phase(uvm_phase phase);
   foreach(slave_agent[i]) begin
     slave_agent[i].cfg = slave_agent_cfg[i];
   end
+
+  v_sqr.env_cfg = env_cfg;
 endfunction
 
 function void axi_env::connect_phase(uvm_phase phase);

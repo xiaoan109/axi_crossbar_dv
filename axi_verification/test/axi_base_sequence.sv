@@ -6,8 +6,8 @@
 class axi_master_base_sequence extends uvm_sequence #(axi_m_txn);
   `uvm_object_utils(axi_master_base_sequence)
   int master_id = -1;
-  static bit [3:0] wr_id[4];  // only lower 4 bits are used
-  static bit [3:0] rd_id[4];  // only lower 4 bits are used
+  static bit [3:0] wr_id[NUM_OF_MASTERS];  // only lower 4 bits are used
+  static bit [3:0] rd_id[NUM_OF_MASTERS];  // only lower 4 bits are used
   rand int dest = -1;
 
   function new(string name = "axi_master_base_sequence");
@@ -16,8 +16,7 @@ class axi_master_base_sequence extends uvm_sequence #(axi_m_txn);
   endfunction
 
   task pre_start();
-    // FIXME: use "*" may be not a good way
-    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "*", "master_id", master_id)) begin
+    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "m_seq", "master_id", master_id)) begin
       `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
     end
   endtask
@@ -43,8 +42,7 @@ class axi_slave_base_sequence extends uvm_sequence #(axi_s_txn);
   endfunction
 
   task pre_start();
-    // FIXME: use "*" may be not a good way
-    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "*", "slave_id", slave_id)) begin
+    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "s_seq", "slave_id", slave_id)) begin
       `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
     end
   endtask
