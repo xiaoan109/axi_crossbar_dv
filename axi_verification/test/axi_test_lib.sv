@@ -32,7 +32,7 @@ class axi_bk_32b_incr_write_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_32b_incr_write_read_vseq::type_id::get());
   endfunction
 endclass
@@ -47,7 +47,7 @@ class axi_nbk_32b_incr_write_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_nbk_32b_incr_write_read_vseq::type_id::get());
   endfunction
 endclass
@@ -62,7 +62,7 @@ class axi_bk_32b_incr_single_master_random_write_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_32b_incr_single_master_random_write_vseq::type_id::get());
   endfunction
 endclass
@@ -77,7 +77,7 @@ class axi_bk_32b_incr_single_master_random_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_32b_incr_single_master_random_read_vseq::type_id::get());
   endfunction
 endclass
@@ -94,7 +94,7 @@ class axi_nbk_32b_incr_single_master_random_write_test extends axi_base_test;
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(
-        this, "v_sqr.main_phase", "default_sequence",
+        this, "env.v_sqr.main_phase", "default_sequence",
         axi_nbk_32b_incr_single_master_random_write_vseq::type_id::get());
   endfunction
 endclass
@@ -109,7 +109,7 @@ class axi_nbk_32b_incr_single_master_random_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_nbk_32b_incr_single_master_random_read_vseq::type_id::get());
   endfunction
 endclass
@@ -125,7 +125,7 @@ class axi_bk_32b_incr_single_master_poll_write_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_32b_incr_single_master_poll_write_vseq::type_id::get());
   endfunction
 endclass
@@ -140,7 +140,7 @@ class axi_bk_32b_incr_single_master_poll_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_32b_incr_single_master_poll_read_vseq::type_id::get());
   endfunction
 endclass
@@ -156,7 +156,7 @@ class axi_bk_8b_incr_write_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_8b_incr_write_read_vseq::type_id::get());
   endfunction
 endclass
@@ -171,7 +171,7 @@ class axi_bk_16b_incr_write_read_test extends axi_base_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_config_db#(uvm_object_wrapper)::set(this, "v_sqr.main_phase", "default_sequence",
+    uvm_config_db#(uvm_object_wrapper)::set(this, "env.v_sqr.main_phase", "default_sequence",
                                             axi_bk_16b_incr_write_read_vseq::type_id::get());
   endfunction
 endclass

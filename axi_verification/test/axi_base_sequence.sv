@@ -15,6 +15,13 @@ class axi_master_base_sequence extends uvm_sequence #(axi_m_txn);
     set_automatic_phase_objection(1);
   endfunction
 
+  task pre_start();
+    // FIXME: use "*" may be not a good way
+    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "*", "master_id", master_id)) begin
+      `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+    end
+  endtask
+
   task body();
     req = axi_m_txn::type_id::create("req");
   endtask
@@ -34,6 +41,13 @@ class axi_slave_base_sequence extends uvm_sequence #(axi_s_txn);
     super.new(name);
     set_automatic_phase_objection(1);
   endfunction
+
+  task pre_start();
+    // FIXME: use "*" may be not a good way
+    if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "*", "slave_id", slave_id)) begin
+      `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
+    end
+  endtask
 
   task body();
     req = axi_s_txn::type_id::create("req");

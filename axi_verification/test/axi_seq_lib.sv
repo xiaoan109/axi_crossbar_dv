@@ -1,15 +1,15 @@
 // ***********************************************************************
-// *****************                                                       
-// ***** ***********                                                       
-// *****   *********       Copyright (c) 2025  NB         
-// *****     *******               (BJ     group)                          
-// *****       *****         XXXXX           Confidential                   
-// *****     *******             All rights reserved                       
-// *****   *********                                                       
-// ***** ***********                                                       
-// *****************                                                       
+// *****************
+// ***** ***********
+// *****   *********       Copyright (c) 2025  NB
+// *****     *******               (BJ     group)
+// *****       *****         XXXXX           Confidential
+// *****     *******             All rights reserved
+// *****   *********
+// ***** ***********
+// *****************
 // ***********************************************************************
-// PROJECT        : 
+// PROJECT        :
 // FILENAME       : axi_seq_lib.sv
 // Author         : EDA [xxxx.com]
 // Created        : 2025-04-24 12:56
@@ -32,15 +32,9 @@ class axi_master_bk_32b_incr_wr_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_bk_32b_incr_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_32b_incr_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Blocking 32b INCR Write sequence", UVM_MEDIUM)
@@ -50,14 +44,14 @@ task axi_master_bk_32b_incr_wr_sequence::body();
   start_item(req);
   // TODO: different burst types
   assert (req.randomize() with {
-    awburst == INCR;
-    awsize == _4_BYTES;
-    op_type == WRITE;
-    transfer_type == BLOCKING_WRITE;
-    awuser == BLOCKING_WRITE; // user signal to indicate transfer type for monitor
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        awburst == INCR;
+        awsize == _4_BYTES;
+        op_type == WRITE;
+        transfer_type == BLOCKING_WRITE;
+        awuser == BLOCKING_WRITE; // user signal to indicate transfer type for monitor
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
   wr_id[master_id]++;
@@ -71,16 +65,8 @@ class axi_master_bk_32b_incr_rd_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
-
-task axi_master_bk_32b_incr_rd_sequence::pre_start();
-  // TODO: use config_db to set num_of_transfers from test
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_32b_incr_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Blocking Read sequence", UVM_MEDIUM)
@@ -89,14 +75,14 @@ task axi_master_bk_32b_incr_rd_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    arburst == INCR;
-    arsize == _4_BYTES;
-    op_type == READ;
-    transfer_type == BLOCKING_READ;
-    aruser == BLOCKING_READ;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        arburst == INCR;
+        arsize == _4_BYTES;
+        op_type == READ;
+        transfer_type == BLOCKING_READ;
+        aruser == BLOCKING_READ;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
   rd_id[master_id]++;
@@ -110,15 +96,9 @@ class axi_master_nbk_32b_incr_wr_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_nbk_32b_incr_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_nbk_32b_incr_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
@@ -126,14 +106,14 @@ task axi_master_nbk_32b_incr_wr_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    awburst == INCR;
-    awsize == _4_BYTES;
-    op_type == WRITE;
-    transfer_type == NON_BLOCKING_WRITE;
-    awuser == NON_BLOCKING_WRITE;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        awburst == INCR;
+        awsize == _4_BYTES;
+        op_type == WRITE;
+        transfer_type == NON_BLOCKING_WRITE;
+        awuser == NON_BLOCKING_WRITE;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
   wr_id[master_id]++;
@@ -147,15 +127,9 @@ class axi_master_nbk_32b_incr_rd_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_nbk_32b_incr_rd_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_nbk_32b_incr_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)
@@ -163,14 +137,14 @@ task axi_master_nbk_32b_incr_rd_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    arburst == INCR;
-    arsize == _4_BYTES;
-    op_type == READ;
-    transfer_type == NON_BLOCKING_READ;
-    aruser == NON_BLOCKING_READ;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        arburst == INCR;
+        arsize == _4_BYTES;
+        op_type == READ;
+        transfer_type == NON_BLOCKING_READ;
+        aruser == NON_BLOCKING_READ;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   if (dest != -1) begin
     req.da = dest[1:0];
   end
@@ -188,15 +162,9 @@ class axi_master_bk_8b_incr_wr_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_bk_8b_incr_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_8b_incr_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
@@ -204,14 +172,14 @@ task axi_master_bk_8b_incr_wr_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    awburst == INCR;
-    awsize == _1_BYTE;
-    op_type == WRITE;
-    transfer_type == BLOCKING_WRITE;
-    awuser == BLOCKING_WRITE;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        awburst == INCR;
+        awsize == _1_BYTE;
+        op_type == WRITE;
+        transfer_type == BLOCKING_WRITE;
+        awuser == BLOCKING_WRITE;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
   wr_id[master_id]++;
@@ -225,15 +193,9 @@ class axi_master_bk_8b_incr_rd_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_bk_8b_incr_rd_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_8b_incr_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)
@@ -241,14 +203,14 @@ task axi_master_bk_8b_incr_rd_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    arburst == INCR;
-    arsize == _1_BYTE;
-    op_type == READ;
-    transfer_type == BLOCKING_READ;
-    aruser == BLOCKING_READ;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        arburst == INCR;
+        arsize == _1_BYTE;
+        op_type == READ;
+        transfer_type == BLOCKING_READ;
+        aruser == BLOCKING_READ;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
   rd_id[master_id]++;
@@ -262,15 +224,9 @@ class axi_master_bk_16b_incr_wr_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_bk_16b_incr_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_16b_incr_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
@@ -278,14 +234,14 @@ task axi_master_bk_16b_incr_wr_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    awburst == INCR;
-    awsize == _2_BYTES;
-    op_type == WRITE;
-    transfer_type == BLOCKING_WRITE;
-    awuser == BLOCKING_WRITE;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        awburst == INCR;
+        awsize == _2_BYTES;
+        op_type == WRITE;
+        transfer_type == BLOCKING_WRITE;
+        awuser == BLOCKING_WRITE;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.awid = {4'h1 << req.sa, wr_id[master_id]};
   finish_item(req);
   wr_id[master_id]++;
@@ -299,15 +255,9 @@ class axi_master_bk_16b_incr_rd_sequence extends axi_master_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_master_bk_16b_incr_rd_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "master_id", master_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_master_bk_16b_incr_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)
@@ -315,14 +265,14 @@ task axi_master_bk_16b_incr_rd_sequence::body();
   req.set_addr_align();
   start_item(req);
   assert (req.randomize() with {
-    arburst == INCR;
-    arsize == _2_BYTES;
-    op_type == READ;
-    transfer_type == BLOCKING_READ;
-    aruser == BLOCKING_READ;
-    sa == master_id[1:0];
-    if (dest != -1) da == dest[1:0];
-  });
+        arburst == INCR;
+        arsize == _2_BYTES;
+        op_type == READ;
+        transfer_type == BLOCKING_READ;
+        aruser == BLOCKING_READ;
+        sa == master_id[1:0];
+        if (dest != -1) da == dest[1:0];
+      });
   req.arid = {4'h1 << req.sa, rd_id[master_id]};
   finish_item(req);
   rd_id[master_id]++;
@@ -339,15 +289,9 @@ class axi_slave_bk_wr_sequence extends axi_slave_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_slave_bk_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_slave_bk_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Blocking Write sequence", UVM_MEDIUM)
@@ -365,15 +309,9 @@ class axi_slave_bk_rd_sequence extends axi_slave_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_slave_bk_rd_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_slave_bk_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Blocking Read sequence", UVM_MEDIUM)
@@ -391,15 +329,9 @@ class axi_slave_nbk_wr_sequence extends axi_slave_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_slave_nbk_wr_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_slave_nbk_wr_sequence::body();
   `uvm_info("WR_SEQ", "Starting Non-Blocking Write sequence", UVM_MEDIUM)
@@ -417,15 +349,9 @@ class axi_slave_nbk_rd_sequence extends axi_slave_base_sequence;
     super.new(name);
   endfunction
 
-  extern virtual task pre_start();
   extern virtual task body();
 endclass
 
-task axi_slave_nbk_rd_sequence::pre_start();
-  if (!uvm_config_db#(int)::get(get_sequencer().get_parent(), "", "slave_id", slave_id)) begin
-    `uvm_fatal("CFGERR", {"Port ID must be set for: ", get_type_name()});
-  end
-endtask
 
 task axi_slave_nbk_rd_sequence::body();
   `uvm_info("RD_SEQ", "Starting Non-Blocking Read sequence", UVM_MEDIUM)

@@ -460,9 +460,9 @@ module tb_top ();
     for (genvar i = 0; i < 4; i++) begin : gen_config_vif
       initial begin
         uvm_config_db#(virtual axi_if #(AXI_DATA_W, AXI_ADDR_W, AXI_ID_W, AXI_USER_W))::set(
-            null, $sformatf("*.master_agent[%0d]", i), "vif", mst[i]);
+            null, "", $sformatf("mst_vif[%0d]", i), mst[i]);
         uvm_config_db#(virtual axi_if #(AXI_DATA_W, AXI_ADDR_W, AXI_ID_W, AXI_USER_W))::set(
-            null, $sformatf("*.slave_agent[%0d]", i), "vif", slv[i]);
+            null, "", $sformatf("slv_vif[%0d]", i), slv[i]);
       end
     end
   endgenerate

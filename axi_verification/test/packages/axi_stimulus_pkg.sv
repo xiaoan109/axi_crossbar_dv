@@ -1,7 +1,6 @@
 package axi_stimulus_pkg;
 
   import uvm_pkg::*;
-  // `include "uvm_macros.svh"
 
   import axi_globals_pkg::*;
 

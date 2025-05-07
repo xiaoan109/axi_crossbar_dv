@@ -1,9 +1,9 @@
 //--------------------------------------------------------------------------------------------
-// Class: axi4_scoreboard
+// Class: axi_scoreboard
 // Scoreboard the data getting from monitor port that goes into the implementation port
 //--------------------------------------------------------------------------------------------
-class axi4_scoreboard extends uvm_scoreboard;
-  `uvm_component_utils(axi4_scoreboard)
+class axi_scoreboard extends uvm_scoreboard;
+  `uvm_component_utils(axi_scoreboard)
   `uvm_analysis_imp_decl(_master_h1)
   `uvm_analysis_imp_decl(_master_h2)
   `uvm_analysis_imp_decl(_master_h3)
@@ -28,17 +28,17 @@ class axi4_scoreboard extends uvm_scoreboard;
   axi_s_txn axi4_slave_tx_h4[4];
   axi_s_txn axi4_slave_tx_h5[4];
 
-  uvm_analysis_imp_master_h1 #(axi_m_txn, axi4_scoreboard) master_analysis_imp_h1;
-  uvm_analysis_imp_master_h2 #(axi_m_txn, axi4_scoreboard) master_analysis_imp_h2;
-  uvm_analysis_imp_master_h3 #(axi_m_txn, axi4_scoreboard) master_analysis_imp_h3;
-  uvm_analysis_imp_master_h4 #(axi_m_txn, axi4_scoreboard) master_analysis_imp_h4;
-  uvm_analysis_imp_master_h5 #(axi_m_txn, axi4_scoreboard) master_analysis_imp_h5;
+  uvm_analysis_imp_master_h1 #(axi_m_txn, axi_scoreboard) master_analysis_imp_h1;
+  uvm_analysis_imp_master_h2 #(axi_m_txn, axi_scoreboard) master_analysis_imp_h2;
+  uvm_analysis_imp_master_h3 #(axi_m_txn, axi_scoreboard) master_analysis_imp_h3;
+  uvm_analysis_imp_master_h4 #(axi_m_txn, axi_scoreboard) master_analysis_imp_h4;
+  uvm_analysis_imp_master_h5 #(axi_m_txn, axi_scoreboard) master_analysis_imp_h5;
 
-  uvm_analysis_imp_slave_h1 #(axi_s_txn, axi4_scoreboard) slave_analysis_imp_h1;
-  uvm_analysis_imp_slave_h2 #(axi_s_txn, axi4_scoreboard) slave_analysis_imp_h2;
-  uvm_analysis_imp_slave_h3 #(axi_s_txn, axi4_scoreboard) slave_analysis_imp_h3;
-  uvm_analysis_imp_slave_h4 #(axi_s_txn, axi4_scoreboard) slave_analysis_imp_h4;
-  uvm_analysis_imp_slave_h5 #(axi_s_txn, axi4_scoreboard) slave_analysis_imp_h5;
+  uvm_analysis_imp_slave_h1 #(axi_s_txn, axi_scoreboard) slave_analysis_imp_h1;
+  uvm_analysis_imp_slave_h2 #(axi_s_txn, axi_scoreboard) slave_analysis_imp_h2;
+  uvm_analysis_imp_slave_h3 #(axi_s_txn, axi_scoreboard) slave_analysis_imp_h3;
+  uvm_analysis_imp_slave_h4 #(axi_s_txn, axi_scoreboard) slave_analysis_imp_h4;
+  uvm_analysis_imp_slave_h5 #(axi_s_txn, axi_scoreboard) slave_analysis_imp_h5;
 
   // //Variable : axi4_master_analysis_fifo
   // //Used to store the axi4_master_data
@@ -191,7 +191,7 @@ class axi4_scoreboard extends uvm_scoreboard;
   //-------------------------------------------------------
   // Externally defined Tasks and Functions
   //-------------------------------------------------------
-  extern function new(string name = "axi4_scoreboard", uvm_component parent = null);
+  extern function new(string name = "axi_scoreboard", uvm_component parent = null);
   extern virtual function void build_phase(uvm_phase phase);
   extern virtual function void connect_phase(uvm_phase phase);
   extern virtual function void end_of_elaboration_phase(uvm_phase phase);
@@ -225,16 +225,16 @@ class axi4_scoreboard extends uvm_scoreboard;
   extern virtual function void check_phase(uvm_phase phase);
   extern virtual function void report_phase(uvm_phase phase);
 
-endclass : axi4_scoreboard
+endclass : axi_scoreboard
 
 //--------------------------------------------------------------------------------------------
 // Construct: new
 //
 // Parameters:
-//  name - axi4_scoreboard
+//  name - axi_scoreboard
 //  parent - parent under which this component is created
 //--------------------------------------------------------------------------------------------
-function axi4_scoreboard::new(string name = "axi4_scoreboard", uvm_component parent = null);
+function axi_scoreboard::new(string name = "axi_scoreboard", uvm_component parent = null);
   super.new(name, parent);
   // for (int i = 0; i < 4; i++) begin
   //   axi4_master_write_address_analysis_fifo[i] =
@@ -287,7 +287,7 @@ endfunction : new
 // Parameters:
 //  phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::build_phase(uvm_phase phase);
+function void axi_scoreboard::build_phase(uvm_phase phase);
   super.build_phase(phase);
 endfunction : build_phase
 
@@ -298,7 +298,7 @@ endfunction : build_phase
 // Parameters:
 //  phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::connect_phase(uvm_phase phase);
+function void axi_scoreboard::connect_phase(uvm_phase phase);
   super.connect_phase(phase);
 endfunction : connect_phase
 
@@ -309,7 +309,7 @@ endfunction : connect_phase
 // Parameters:
 //  phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::end_of_elaboration_phase(uvm_phase phase);
+function void axi_scoreboard::end_of_elaboration_phase(uvm_phase phase);
   super.end_of_elaboration_phase(phase);
 endfunction : end_of_elaboration_phase
 
@@ -320,7 +320,7 @@ endfunction : end_of_elaboration_phase
 // Parameters:
 //  phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::start_of_simulation_phase(uvm_phase phase);
+function void axi_scoreboard::start_of_simulation_phase(uvm_phase phase);
   super.start_of_simulation_phase(phase);
 endfunction : start_of_simulation_phase
 
@@ -330,7 +330,7 @@ endfunction : start_of_simulation_phase
 // Parameters:
 //  phase - uvm phase
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::run_phase(uvm_phase phase);
+task axi_scoreboard::run_phase(uvm_phase phase);
 
   super.run_phase(phase);
 
@@ -348,35 +348,35 @@ endtask : run_phase
 // Function: write_master
 // Write the master data into the fifo
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::write_master_h1(axi_m_txn txn);
+function void axi_scoreboard::write_master_h1(axi_m_txn txn);
   // axi4_master_write_address_analysis_fifo[txn.da].write(txn);
   axi4_master_tx_q_h1[txn.da].push_back(txn);
   ->axi4_master_write_address_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_master_tx_q_h1[%0d]", txn.da), UVM_HIGH)
 endfunction : write_master_h1
 
-function void axi4_scoreboard::write_master_h2(axi_m_txn txn);
+function void axi_scoreboard::write_master_h2(axi_m_txn txn);
   // axi4_master_write_data_analysis_fifo[txn.da].write(txn);
   axi4_master_tx_q_h2[txn.da].push_back(txn);
   ->axi4_master_write_data_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_master_tx_q_h2[%0d]", txn.da), UVM_HIGH)
 endfunction : write_master_h2
 
-function void axi4_scoreboard::write_master_h3(axi_m_txn txn);
+function void axi_scoreboard::write_master_h3(axi_m_txn txn);
   // axi4_master_write_response_analysis_fifo[txn.da].write(txn);
   axi4_master_tx_q_h3[txn.da].push_back(txn);
   ->axi4_master_write_response_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_master_tx_q_h3[%0d]", txn.da), UVM_HIGH)
 endfunction : write_master_h3
 
-function void axi4_scoreboard::write_master_h4(axi_m_txn txn);
+function void axi_scoreboard::write_master_h4(axi_m_txn txn);
   // axi4_master_read_address_analysis_fifo[txn.da].write(txn);
   axi4_master_tx_q_h4[txn.da].push_back(txn);
   ->axi4_master_read_address_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_master_tx_q_h4[%0d]", txn.da), UVM_HIGH)
 endfunction : write_master_h4
 
-function void axi4_scoreboard::write_master_h5(axi_m_txn txn);
+function void axi_scoreboard::write_master_h5(axi_m_txn txn);
   // axi4_master_read_data_analysis_fifo[txn.da].write(txn);
   axi4_master_tx_q_h5[txn.da].push_back(txn);
   ->axi4_master_read_data_event[txn.da];
@@ -387,35 +387,35 @@ endfunction : write_master_h5
 // Function: write_slave
 // Write the slave data into the fifo
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::write_slave_h1(axi_s_txn txn);
+function void axi_scoreboard::write_slave_h1(axi_s_txn txn);
   // axi4_slave_write_address_analysis_fifo[txn.da].write(txn);
   axi4_slave_tx_q_h1[txn.da].push_back(txn);
   ->axi4_slave_write_address_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_slave_tx_q_h1[%0d]", txn.da), UVM_HIGH)
 endfunction : write_slave_h1
 
-function void axi4_scoreboard::write_slave_h2(axi_s_txn txn);
+function void axi_scoreboard::write_slave_h2(axi_s_txn txn);
   // axi4_slave_write_data_analysis_fifo[txn.da].write(txn);
   axi4_slave_tx_q_h2[txn.da].push_back(txn);
   ->axi4_slave_write_data_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_slave_tx_q_h2[%0d]", txn.da), UVM_HIGH)
 endfunction : write_slave_h2
 
-function void axi4_scoreboard::write_slave_h3(axi_s_txn txn);
+function void axi_scoreboard::write_slave_h3(axi_s_txn txn);
   // axi4_slave_write_response_analysis_fifo[txn.da].write(txn);
   axi4_slave_tx_q_h3[txn.da].push_back(txn);
   ->axi4_slave_write_response_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_slave_tx_q_h3[%0d]", txn.da), UVM_HIGH)
 endfunction : write_slave_h3
 
-function void axi4_scoreboard::write_slave_h4(axi_s_txn txn);
+function void axi_scoreboard::write_slave_h4(axi_s_txn txn);
   // axi4_slave_read_address_analysis_fifo[txn.da].write(txn);
   axi4_slave_tx_q_h4[txn.da].push_back(txn);
   ->axi4_slave_read_address_event[txn.da];
   `uvm_info(get_type_name(), $sformatf("push back axi4_slave_tx_q_h4[%0d]", txn.da), UVM_HIGH)
 endfunction : write_slave_h4
 
-function void axi4_scoreboard::write_slave_h5(axi_s_txn txn);
+function void axi_scoreboard::write_slave_h5(axi_s_txn txn);
   // axi4_slave_read_data_analysis_fifo[txn.da].write(txn);
   axi4_slave_tx_q_h5[txn.da].push_back(txn);
   ->axi4_slave_read_data_event[txn.da];
@@ -426,7 +426,7 @@ endfunction : write_slave_h5
 // Task: axi4_write_address
 // Gets the master and slave write address and send it to the write address comparision task
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_address();
+task axi_scoreboard::axi4_write_address();
   int q_len[4];
   int idx  [4] [$];
   for (int i = 0; i < 4; i++) begin
@@ -501,7 +501,7 @@ endtask : axi4_write_address
 // Task: axi4_write_data
 // Gets the master and slave write data and send it to the write data comparision task
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_data();
+task axi_scoreboard::axi4_write_data();
   int q_len[4];
   int idx  [4] [$];
   for (int i = 0; i < 4; i++) begin
@@ -575,7 +575,7 @@ endtask : axi4_write_data
 // Task: axi4_write_response
 // Gets the master and slave write response and send it to the write response comparision task
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_response();
+task axi_scoreboard::axi4_write_response();
   int q_len[4];
   int idx  [4] [$];
   for (int i = 0; i < 4; i++) begin
@@ -647,7 +647,7 @@ endtask : axi4_write_response
 // Task: axi4_read_address
 // Gets the master and slave read address and send it to the read address comparision task
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_read_address();
+task axi_scoreboard::axi4_read_address();
   int q_len[4];
   int idx  [4] [$];
   for (int i = 0; i < 4; i++) begin
@@ -723,7 +723,7 @@ endtask : axi4_read_address
 // Task: axi4_read_data
 // Gets the master and slave read data and send it to the read data comparision task
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_read_data();
+task axi_scoreboard::axi4_read_data();
   int q_len[4];
   int idx  [4] [$];
   for (int i = 0; i < 4; i++) begin
@@ -778,7 +778,7 @@ endtask : axi4_read_data
 //  axi4_master_tx_h1 - axi_m_txn
 //  axi4_slave_tx_h1  - axi_s_txn
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_address_comparision(input axi_m_txn axi4_master_tx_h1,
+task axi_scoreboard::axi4_write_address_comparision(input axi_m_txn axi4_master_tx_h1,
                                                      input axi_s_txn axi4_slave_tx_h1);
 
   if (axi4_master_tx_h1.awid == axi4_slave_tx_h1.awid) begin
@@ -940,7 +940,7 @@ endtask : axi4_write_address_comparision
 //  axi4_master_tx_h2 - axi_m_txn
 //  axi4_slave_tx_h2  - axi_s_txn
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_data_comparision(input axi_m_txn axi4_master_tx_h2,
+task axi_scoreboard::axi4_write_data_comparision(input axi_m_txn axi4_master_tx_h2,
                                                   input axi_s_txn axi4_slave_tx_h2);
 
   axi4_write_address_comparision(axi4_master_tx_h2, axi4_slave_tx_h2);
@@ -1004,7 +1004,7 @@ endtask : axi4_write_data_comparision
 //  axi4_master_tx_h3 - axi_m_txn
 //  axi4_slave_tx_h3  - axi_s_txn
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_write_response_comparision(input axi_m_txn axi4_master_tx_h3,
+task axi_scoreboard::axi4_write_response_comparision(input axi_m_txn axi4_master_tx_h3,
                                                       input axi_s_txn axi4_slave_tx_h3);
 
   axi4_write_data_comparision(axi4_master_tx_h3, axi4_slave_tx_h3);
@@ -1064,7 +1064,7 @@ endtask : axi4_write_response_comparision
 //  axi4_master_tx_h4 - axi_m_txn
 //  axi4_slave_tx_h4  - axi_s_txn
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_read_address_comparision(input axi_m_txn axi4_master_tx_h4,
+task axi_scoreboard::axi4_read_address_comparision(input axi_m_txn axi4_master_tx_h4,
                                                     input axi_s_txn axi4_slave_tx_h4);
 
 
@@ -1254,7 +1254,7 @@ endtask : axi4_read_address_comparision
 //  axi4_master_tx_h5 - axi_m_txn
 //  axi4_slave_tx_h5  - axi_s_txn
 //--------------------------------------------------------------------------------------------
-task axi4_scoreboard::axi4_read_data_comparision(input axi_m_txn axi4_master_tx_h5,
+task axi_scoreboard::axi4_read_data_comparision(input axi_m_txn axi4_master_tx_h5,
                                                  input axi_s_txn axi4_slave_tx_h5);
 
   axi4_read_address_comparision(axi4_master_tx_h5, axi4_slave_tx_h5);
@@ -1329,7 +1329,7 @@ endtask : axi4_read_data_comparision
 // Parameters:
 // phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::check_phase(uvm_phase phase);
+function void axi_scoreboard::check_phase(uvm_phase phase);
   super.check_phase(phase);
 
   `uvm_info(get_type_name(), $sformatf(
@@ -1858,7 +1858,7 @@ endfunction : check_phase
 // Parameters:
 // phase - uvm phase
 //--------------------------------------------------------------------------------------------
-function void axi4_scoreboard::report_phase(uvm_phase phase);
+function void axi_scoreboard::report_phase(uvm_phase phase);
   super.report_phase(phase);
 
   $display(" ");

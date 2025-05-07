@@ -26,8 +26,8 @@ defines =
 uvm_defines = UVM_NO_DEPRECATED+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
 plus = 
 option = UVM_TR_RECORD + UVM_LOG_RECORD
-trace = 
-#trace = UVM_OBJECTION_TRACE
+# trace = UVM_CONFIG_DB_TRACE
+# trace = UVM_OBJECTION_TRACE
 testlist_name = testlist.f
 ifndef test_folder
 override test_folder = ${test}
@@ -112,6 +112,9 @@ verdi_cov:
 
 verdi_merged:
 	verdi -cov -covdir merged/simv.vdb &
+
+list_tests:
+	@cat ${root_path}/testlists/${testlist_name}
 
 clean:
 	rm -rf csrc *.vdb *.vcd *.fsdb *.vpd \

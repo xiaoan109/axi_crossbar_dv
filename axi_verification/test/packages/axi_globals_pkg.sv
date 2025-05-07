@@ -19,6 +19,15 @@ package axi_globals_pkg;
 
   parameter int OUTSTANDING_FIFO_DEPTH = 16;  // only for slave driver
 
+  parameter bit MASTER_AGENT_ACTIVE = 1;
+  parameter bit SLAVE_AGENT_ACTIVE = 1;
+  parameter int NUM_OF_MASTERS = 4;
+  parameter int NUM_OF_SLAVES = 4;
+  parameter int SLAVE_MEMORY_SIZE = 6; // $clog2((1<<AXI_ADDR_W) / NUM_OF_SLAVES)
+  parameter int SLAVE_MEMORY_GAP = 1;
+  parameter int MEMORY_WIDTH = 8; // each location size
+
+
   typedef enum bit {
     READ,
     WRITE
